@@ -41,3 +41,13 @@ Can leverage these SDKs to assist your development.
 | Java     | [Java SDK](https://cdn.marmot-cloud.com/page/antom-integration-doc/library/java.md)           |
 | Python   | [Python SDK](https://cdn.marmot-cloud.com/page/antom-integration-doc/library/python.md)       |
 | Embedded Element WEB SDK | [Element WEB SDK](https://cdn.marmot-cloud.com/page/antom-integration-doc/web-sdk/web-sdk.md) |
+
+
+# Security Red Lines
+> ⛔ The following rules are **security red lines** for Antom payment integration. Violations may lead to financial loss or security incidents and must be strictly adhered to.
+- **Private Key Must NOT Be Stored on the Client Side**: Transaction data construction and signing must be completed on the merchant's server. The private key must absolutely NOT be stored in the merchant's APP client.
+- **Private Key Must NOT Be Logged**: The private key must not appear in any logs.
+- **Private Key Must NOT Be Committed to Public Repositories**: The private key must not be uploaded to public code repositories like GitHub or GitLab.
+- **Client-side Payment Results Are Untrustworthy**: The synchronous redirect result on the client side is untrustworthy. The result must be confirmed via Antom's asynchronous notification (Notify) or by calling the transaction query API.
+- **No Repayment Before Confirmation**: Before the payment result is confirmed, the user must not be asked to pay again. The payment result must first be confirmed via asynchronous notification or the query API.
+- **Asynchronous Notifications Must Be Verified First**: Upon receiving an asynchronous notification, signature verification must be performed first to ensure the notification is from Antom.
