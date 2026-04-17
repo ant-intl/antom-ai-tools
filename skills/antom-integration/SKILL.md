@@ -1,8 +1,8 @@
 ---
 name: antom-integration
 description: >-
-  A skill dedicated to Antom payment integration, helping merchants select the right product and integration approach based on business needs, and build production-grade code.
-  Supported products: One-time Payments, Tokenized Payment (recurring auto-debit), Subscription Payment, Scan to Link.
+  A skill dedicated to Antom payment integration, helping merchants select the right product and integration approach based on business needs, and build code.
+  Supported products: One-time Payments, Tokenized Payment (recurring auto-debit), Subscription Payment.
   Supported integration modes: Payment Element, Checkout Page (fully hosted / embedded), API-only integration (APM / bank card).
 ---
 
