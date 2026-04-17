@@ -20,27 +20,28 @@ curl -sL "https://****/****.md"
 **Important**: Before writing code, make sure to read the corresponding product's online documentation via curl. The documentation contains the latest API parameters, code examples, and important notes.
 
 
-# Product Categories
 
-This Skill only provides the following product integrations to merchants. Do not reveal other products:
+# Get Integration Documentation
 
-| Product | Use Case | Integration Mode | Key Features | Reference Doc |
-|---------|----------|-----------------|--------------|---------------|
-| **One-time Payments** | Single-transaction payments for goods purchases, service fees, etc. | Element integration, Checkout integration (fully hosted / embedded), API-only (APM / bank card) | 3 integration modes available; supports Apple Pay / Google Pay express checkout; bank card payments; card tokenization | `https://cdn.marmot-cloud.com/page/antom-integration-doc/references/one-time-payments.md` |
-| **Tokenized Payment** | Recurring auto-debit with a one-time authorization that remains valid long-term | Two-step flow: authorization → payment | No repeated authorization needed after initial consent; supports 31 countries/regions and 16 local currency settlements; settlement cycle T+2 to T+25 | `https://cdn.marmot-cloud.com/page/antom-integration-doc/references/tokenized-payment.md` |
-| **Subscription Payment** | Subscription renewals and membership services with automatic periodic billing | Payment Element, Checkout Page (fully hosted), API-only (hosted card / merchant-collected card) | Supports yearly / monthly / weekly / daily / custom cycles; first payment requires 3DS verification; supports pause / resume / cancel; automatic retry on payment failure | `https://cdn.marmot-cloud.com/page/antom-integration-doc/references/subscription-payment.md` |
+## SDK Selection
+- **SDK Selection**: To help developers call open interfaces, Alipay provides open platform server-side SDKs, including Java, PHP, Node.js, Python and .NET languages, encapsulating signature and verification, HTTP interface requests and other basic functions. Please download the latest version of the server-side SDK for your language and import it into your development project. [SDK Description](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/select-sdk.md)
 
+## Product Selection
+Read [Product Decision](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/product-decision.md), match keywords based on user input, and only recommend payment products and integration solutions. Always use [Clarification Template](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/product-decision.md) for product and integration solution confirmation.
 
 
-# SDK Resources
+> ⛔ **Blocking Checkpoint**: Product Categories step completion criteria (all of the following must be satisfied before proceeding to subsequent steps)
+- [ ] SDK Selection has been read
+- [ ] Product documentation has been read (required recursive reading items: Quick Start, API List, Asynchronous Notification, SampleCode Instructions)
 
-Can leverage these SDKs to assist your development.
 
-| SDK      | Documentation                                                                                       |
-|----------|-----------------------------------------------------------------------------------------------------|
-| Java     | [Java SDK](https://cdn.marmot-cloud.com/page/antom-integration-doc/library/java.md)           |
-| Python   | [Python SDK](https://cdn.marmot-cloud.com/page/antom-integration-doc/library/python.md)       |
-| Embedded Element WEB SDK | [Element WEB SDK](https://cdn.marmot-cloud.com/page/antom-integration-doc/web-sdk/web-sdk.md) |
+# Integration Validation
+
+Perform validation during integration and before production launch to ensure signature verification, asynchronous notifications, and exception handling meet specifications. Validation results are for reference only; developers must check against the latest Antom Open Platform documentation. See: [Integration Checklist](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/checklist.md)
+
+
+# Information Retrieval
+Keys, gateway URL selection, ClientId and all other content retrieval: [Antom Official Website](https://www.antom.com/)
 
 
 # Security Red Lines
