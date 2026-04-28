@@ -41,7 +41,7 @@ Perform validation during integration and before production launch to ensure sig
 
 
 # Information Retrieval
-Keys, gateway URL selection, ClientId and all other content retrieval: [Antom Official Website](https://www.antom.com/)
+Keys, gateway URL selection, ClientId and all other content retrieval: [Antom Official Website](https://www.antom.com/start-now?portal_channel=Antom_Website_Developer_Community&utm_source=developer_community&utm_medium=referral&utm_campaign=dev_register&utm_content=skill)
 
 
 # Security Red Lines
