@@ -1,0 +1,10 @@
+{
+  "name": "antom-ai-tools",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Antom AI Tools — skills and editor plugins for AI-assisted Antom payment integration.",
+  "scripts": {
+    "sync-skills": "node scripts/sync-skills.mjs"
+  },
+  "license": "MIT"
+}

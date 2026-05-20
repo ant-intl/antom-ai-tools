@@ -1,0 +1,21 @@
+{
+  "name": "antom-ai-tools",
+  "interface": {
+    "displayName": "Antom AI Tools"
+  },
+  "plugins": [
+    {
+      "name": "antom-integration",
+      "source": {
+        "source": "local",
+        "path": "./providers/codex/plugins/antom-integration"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Payments"
+    }
+  ]
+}
+

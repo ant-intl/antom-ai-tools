@@ -1,0 +1,20 @@
+{
+  "name": "antom-integration",
+  "displayName": "Antom Integration",
+  "version": "0.1.0",
+  "description": "Antom payment integration guidance for Cursor: product selection, integration mode (Payment Element / Checkout / API-only), and security validation.",
+  "author": {
+    "name": "Antom",
+    "email": "TechnicalService@antom.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "antom",
+    "payments",
+    "payment-integration",
+    "checkout",
+    "subscription",
+    "tokenized-payment"
+  ],
+  "logo": "assets/logo_antom.svg"
+}
