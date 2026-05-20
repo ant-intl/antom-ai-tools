@@ -1,0 +1,20 @@
+{
+  "name": "antom-integration",
+  "description": "Antom payment integration guidance: product selection, integration mode (Payment Element / Checkout / API-only), and security validation.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Antom",
+    "email": "TechnicalService@antom.com"
+  },
+  "homepage": "https://docs.antom.com",
+  "repository": "https://github.com/antom-example/ai-antom",
+  "license": "MIT",
+  "keywords": [
+    "antom",
+    "payments",
+    "payment-integration",
+    "checkout",
+    "subscription",
+    "tokenized-payment"
+  ]
+}

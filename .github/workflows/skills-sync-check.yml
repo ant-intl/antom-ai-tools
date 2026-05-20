@@ -1,0 +1,50 @@
+name: skills-sync-check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify provider skill directories match source
+        run: |
+          out_of_sync=false
+
+          for skill_dir in skills/*/; do
+            skill_name="$(basename "$skill_dir")"
+
+            for target in \
+              "providers/cursor/plugin/skills/$skill_name" \
+              "providers/claude/plugin/skills/$skill_name" \
+              "providers/codex/plugins/$skill_name/skills/$skill_name"; do
+
+              if [ ! -d "$target" ]; then
+                echo "::error::$target is missing"
+                out_of_sync=true
+                continue
+              fi
+
+              if ! diff -r "skills/$skill_name" "$target" > /dev/null 2>&1; then
+                echo "::error::$target is out of sync with skills/$skill_name"
+                diff -r "skills/$skill_name" "$target" || true
+                out_of_sync=true
+              fi
+            done
+          done
+
+          if [ "$out_of_sync" = true ]; then
+            echo ""
+            echo "Fix: run 'npm run sync-skills' and commit the result."
+            exit 1
+          fi
+
+          echo "✅ All provider skill directories are in sync."

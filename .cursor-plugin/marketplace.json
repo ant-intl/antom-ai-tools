@@ -1,0 +1,18 @@
+{
+  "name": "antom",
+  "owner": {
+    "name": "Antom",
+    "email": "TechnicalService@antom.com"
+  },
+  "metadata": {
+    "description": "Antom AI plugins for Cursor: payment product selection, integration mode guidance, and security validation.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "antom-integration",
+      "source": "./providers/cursor/plugin",
+      "description": "Antom payment integration guidance for Cursor."
+    }
+  ]
+}

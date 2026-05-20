@@ -1,0 +1,22 @@
+{
+  "name": "antom",
+  "owner": {
+    "name": "Antom",
+    "email": "TechnicalService@antom.com"
+  },
+  "metadata": {
+    "description": "Antom AI plugins for Claude Code: payment product selection, integration mode guidance, and security validation.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "antom-integration",
+      "source": "./providers/claude/plugin/",
+      "description": "Antom payment integration guidance for Claude Code.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Antom"
+      }
+    }
+  ]
+}
