@@ -101,6 +101,20 @@ This Skill turns AI into a reconciliation expert. Simply provide your local Sett
 
 ### Install
 
+#### OpenClaw
+
+Manually copy the skill into your OpenClaw skills directory:
+
+```bash
+cp -R skills/antom-reconciliation-expert ~/.openclaw/skills/antom-reconciliation-expert
+```
+
+Verify installation:
+
+```bash
+openclaw skills list
+```
+
 #### Cursor
 
 Submit / install via the Cursor marketplace, or for local development:
@@ -138,20 +152,6 @@ Marketplace entry: [`.claude-plugin/marketplace.json`](.claude-plugin/marketplac
 Marketplace entry: [`.codex-plugin/marketplace.json`](.codex-plugin/marketplace.json) (legacy importer reads `.agents/plugins/marketplace.json`).
 
 Plugin manifest: [`providers/codex/plugins/antom-reconciliation-expert/.codex-plugin/plugin.json`](providers/codex/plugins/antom-reconciliation-expert/.codex-plugin/plugin.json)
-
-#### OpenClaw
-
-Manually copy the skill into your OpenClaw skills directory:
-
-```bash
-cp -R skills/antom-reconciliation-expert ~/.openclaw/skills/antom-reconciliation-expert
-```
-
-Verify installation:
-
-```bash
-openclaw skills list
-```
 
 ### Example Prompts
 
