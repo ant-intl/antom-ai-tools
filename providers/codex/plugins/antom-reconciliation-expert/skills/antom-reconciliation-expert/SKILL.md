@@ -1,6 +1,6 @@
 ---
 name: antom-reconciliation-expert
-description: Reconciliation Report Analysis Expert - Parses ONLY local Settlement Detail report files (SETTLEMENT_DETAIL_*.csv / .xlsx) for settlement amount validation, fee analysis, and reconciliation knowledge Q&A. Does NOT support Transaction Detail or Settlement Summary reports. Triggers: settlement detail parsing, settlement amount validation, fee analysis, fee model, reconciliation knowledge, interchangeFee, schemeFee, fee rules, settlement, attribution.
+description: "Reconciliation Report Analysis Expert - Parses ONLY local Settlement Detail report files (SETTLEMENT_DETAIL_*.csv / .xlsx) for settlement amount validation, fee analysis, and reconciliation knowledge Q&A. Does NOT support Transaction Detail or Settlement Summary reports. Triggers: settlement detail parsing, settlement amount validation, fee analysis, fee model, reconciliation knowledge, interchangeFee, schemeFee, fee rules, settlement, attribution."
 ---
 
 # Reconciliation Expert
