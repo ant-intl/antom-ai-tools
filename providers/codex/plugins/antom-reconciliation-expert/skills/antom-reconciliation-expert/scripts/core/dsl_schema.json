@@ -1,0 +1,119 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Filter DSL Schema",
+  "description": "JSON Schema definition for report data filtering DSL",
+  "type": "object",
+  "properties": {
+    "WHERE": {
+      "$ref": "#/definitions/condition"
+    },
+    "SELECT": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "List of column names to return, empty or unspecified returns all columns"
+    },
+    "GROUP_BY": {
+      "type": "object",
+      "properties": {
+        "columns": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Grouping column names"
+        },
+        "aggregations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "column": {"type": "string", "description": "Column to aggregate"},
+              "function": {"$ref": "#/definitions/agg_function"},
+              "alias": {"type": "string", "description": "Alias for aggregation result"}
+            },
+            "required": ["column", "function"]
+          }
+        }
+      },
+      "required": ["columns", "aggregations"]
+    },
+    "ORDER_BY": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "column": {"type": "string"},
+          "direction": {"enum": ["ASC", "DESC"], "default": "ASC"}
+        },
+        "required": ["column"]
+      }
+    },
+    "LIMIT": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Limit returned row count"
+    }
+  },
+  "definitions": {
+    "condition": {
+      "oneOf": [
+        {"$ref": "#/definitions/simple_condition"},
+        {"$ref": "#/definitions/and_condition"},
+        {"$ref": "#/definitions/or_condition"}
+      ]
+    },
+    "simple_condition": {
+      "type": "object",
+      "properties": {
+        "column": {"type": "string", "description": "Field name"},
+        "op": {"$ref": "#/definitions/operator"},
+        "value": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "number"},
+            {"type": "boolean"},
+            {"type": "array"}
+          ],
+          "description": "Comparison value (array for IN operation)"
+        }
+      },
+      "required": ["column", "op"],
+      "additionalProperties": false
+    },
+    "and_condition": {
+      "type": "object",
+      "properties": {
+        "AND": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/condition"},
+          "minItems": 2
+        }
+      },
+      "required": ["AND"],
+      "additionalProperties": false
+    },
+    "or_condition": {
+      "type": "object",
+      "properties": {
+        "OR": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/condition"},
+          "minItems": 2
+        }
+      },
+      "required": ["OR"],
+      "additionalProperties": false
+    },
+    "operator": {
+      "enum": [
+        "=", "!=", ">", ">=", "<", "<=",
+        "IN", "NOT IN",
+        "LIKE",
+        "IS NULL", "IS NOT NULL"
+      ],
+      "description": "Filter operator"
+    },
+    "agg_function": {
+      "enum": ["SUM", "AVG", "COUNT", "MIN", "MAX", "FIRST", "LAST"],
+      "description": "Aggregation function"
+    }
+  }
+}
