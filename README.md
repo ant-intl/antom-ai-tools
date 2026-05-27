@@ -18,9 +18,6 @@ Each Skill is packaged for every major AI code editor and agent platform, so you
 | Cursor | `antom-integration` | [`providers/cursor/plugin`](providers/cursor/plugin) |
 | Claude Code | `antom-integration` | [`providers/claude/plugin`](providers/claude/plugin) |
 | Codex | `antom-integration` | [`providers/codex/plugins/antom-integration`](providers/codex/plugins/antom-integration) |
-| Cursor | `antom-reconciliation-expert` | [`providers/cursor/plugin`](providers/cursor/plugin) |
-| Claude Code | `antom-reconciliation-expert` | [`providers/claude/plugin`](providers/claude/plugin) |
-| Codex | `antom-reconciliation-expert` | [`providers/codex/plugins/antom-reconciliation-expert`](providers/codex/plugins/antom-reconciliation-expert) |
 | OpenClaw | `antom-reconciliation-expert` | [`skills/antom-reconciliation-expert`](skills/antom-reconciliation-expert) |
 
 ## antom-integration
@@ -114,44 +111,6 @@ Verify installation:
 ```bash
 openclaw skills list
 ```
-
-#### Cursor
-
-Submit / install via the Cursor marketplace, or for local development:
-
-```bash
-cp -R providers/cursor/plugin ~/.cursor/plugins/local/antom-reconciliation-expert
-# then restart Cursor (>= 2.6)
-```
-
-Marketplace entry: [`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json)
-
-#### Claude Code
-
-```text
-/plugin marketplace add ant-intl/antom-ai-tools
-/plugin install antom-reconciliation-expert@antom
-```
-
-For local development, point the marketplace at the working copy:
-
-```text
-/plugin marketplace add /absolute/path/to/antom-ai-tools
-```
-
-Validate locally:
-
-```bash
-claude plugin validate .
-```
-
-Marketplace entry: [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json)
-
-#### Codex
-
-Marketplace entry: [`.codex-plugin/marketplace.json`](.codex-plugin/marketplace.json) (legacy importer reads `.agents/plugins/marketplace.json`).
-
-Plugin manifest: [`providers/codex/plugins/antom-reconciliation-expert/.codex-plugin/plugin.json`](providers/codex/plugins/antom-reconciliation-expert/.codex-plugin/plugin.json)
 
 ### Example Prompts
 
