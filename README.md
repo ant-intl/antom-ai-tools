@@ -13,12 +13,12 @@ A one-stop repository for building AI-powered products with Antom payment integr
 
 Each Skill is packaged for every major AI code editor and agent platform, so you can install it natively without copying files by hand.
 
-| Platform | Plugin | Source |
-|----------|--------|--------|
-| Cursor | `antom-integration` | [`providers/cursor/plugin`](providers/cursor/plugin) |
-| Claude Code | `antom-integration` | [`providers/claude/plugin`](providers/claude/plugin) |
-| Codex | `antom-integration` | [`providers/codex/plugins/antom-integration`](providers/codex/plugins/antom-integration) |
-| OpenClaw | `antom-reconciliation-expert` | [`skills/antom-reconciliation-expert`](skills/antom-reconciliation-expert) |
+| Platform | Type | Name | Source |
+|----------|------|------|--------|
+| Cursor | Plugin | `antom-integration` | [`providers/cursor/plugin`](providers/cursor/plugin) |
+| Claude Code | Plugin | `antom-integration` | [`providers/claude/plugin`](providers/claude/plugin) |
+| Codex | Plugin | `antom-integration` | [`providers/codex/plugins/antom-integration`](providers/codex/plugins/antom-integration) |
+| OpenClaw | Skill | `antom-reconciliation-expert` | [`skills/antom-reconciliation-expert`](skills/antom-reconciliation-expert) |
 
 ## antom-integration
 
