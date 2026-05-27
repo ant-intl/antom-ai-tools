@@ -11,16 +11,17 @@ A one-stop repository for building AI-powered products with Antom payment integr
 
 ## Available Plugins
 
-Each Skill is packaged for every major AI code editor, so you can install it natively without copying files by hand.
+Each Skill is packaged for every major AI code editor and agent platform, so you can install it natively without copying files by hand.
 
-| Editor | Plugin | Source |
-|--------|--------|--------|
+| Platform | Plugin | Source |
+|----------|--------|--------|
 | Cursor | `antom-integration` | [`providers/cursor/plugin`](providers/cursor/plugin) |
-| Cursor | `antom-reconciliation-expert` | [`providers/cursor/plugin`](providers/cursor/plugin) |
 | Claude Code | `antom-integration` | [`providers/claude/plugin`](providers/claude/plugin) |
-| Claude Code | `antom-reconciliation-expert` | [`providers/claude/plugin`](providers/claude/plugin) |
 | Codex | `antom-integration` | [`providers/codex/plugins/antom-integration`](providers/codex/plugins/antom-integration) |
+| Cursor | `antom-reconciliation-expert` | [`providers/cursor/plugin`](providers/cursor/plugin) |
+| Claude Code | `antom-reconciliation-expert` | [`providers/claude/plugin`](providers/claude/plugin) |
 | Codex | `antom-reconciliation-expert` | [`providers/codex/plugins/antom-reconciliation-expert`](providers/codex/plugins/antom-reconciliation-expert) |
+| OpenClaw | `antom-reconciliation-expert` | [`skills/antom-reconciliation-expert`](skills/antom-reconciliation-expert) |
 
 ## antom-integration
 
@@ -137,6 +138,20 @@ Marketplace entry: [`.claude-plugin/marketplace.json`](.claude-plugin/marketplac
 Marketplace entry: [`.codex-plugin/marketplace.json`](.codex-plugin/marketplace.json) (legacy importer reads `.agents/plugins/marketplace.json`).
 
 Plugin manifest: [`providers/codex/plugins/antom-reconciliation-expert/.codex-plugin/plugin.json`](providers/codex/plugins/antom-reconciliation-expert/.codex-plugin/plugin.json)
+
+#### OpenClaw
+
+Manually copy the skill into your OpenClaw skills directory:
+
+```bash
+cp -R skills/antom-reconciliation-expert ~/.openclaw/skills/antom-reconciliation-expert
+```
+
+Verify installation:
+
+```bash
+openclaw skills list
+```
 
 ### Example Prompts
 
