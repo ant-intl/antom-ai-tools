@@ -25,7 +25,7 @@ jobs:
             for target in \
               "providers/cursor/plugin/skills/$skill_name" \
               "providers/claude/plugin/skills/$skill_name" \
-              "providers/codex/plugins/$skill_name/skills/$skill_name"; do
+              "providers/codex/plugins/antom-integration/skills/$skill_name"; do
 
               if [ ! -d "$target" ]; then
                 echo "::error::$target is missing"
