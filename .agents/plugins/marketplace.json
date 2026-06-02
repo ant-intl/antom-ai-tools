@@ -5,10 +5,10 @@
   },
   "plugins": [
     {
-      "name": "antom-integration",
+      "name": "antom",
       "source": {
         "source": "local",
-        "path": "./providers/codex/plugins/antom-integration"
+        "path": "./providers/codex/plugins/antom"
       },
       "policy": {
         "installation": "AVAILABLE",

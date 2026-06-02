@@ -1,8 +1,8 @@
 {
-  "name": "antom-integration",
-  "displayName": "Antom Integration",
+  "name": "antom",
+  "displayName": "Antom",
   "version": "0.1.0",
-  "description": "Antom payment integration guidance for Cursor: product selection, integration mode (Payment Element / Checkout / API-only), and security validation.",
+  "description": "Antom AI tools for Cursor: payment integration guidance (product selection, integration mode, security validation) and reconciliation report analysis.",
   "author": {
     "name": "Antom",
     "email": "TechnicalService@antom.com"

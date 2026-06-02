@@ -10,9 +10,9 @@
   },
   "plugins": [
     {
-      "name": "antom-integration",
+      "name": "antom",
       "source": "./providers/cursor/plugin",
-      "description": "Antom payment integration guidance for Cursor."
+      "description": "Antom AI tools for Cursor: payment integration guidance and reconciliation report analysis."
     }
   ]
 }

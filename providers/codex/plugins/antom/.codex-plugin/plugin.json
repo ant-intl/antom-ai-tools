@@ -1,7 +1,7 @@
 {
-  "name": "antom-integration",
+  "name": "antom",
   "version": "0.1.0",
-  "description": "Antom payment integration guidance for Codex.",
+  "description": "Antom AI tools for Codex: payment integration guidance and reconciliation report analysis.",
   "author": {
     "name": "Antom",
     "url": "https://www.antom.com/"
@@ -19,9 +19,9 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Antom Integration",
-    "shortDescription": "Guide Antom payment product selection and integration.",
-    "longDescription": "Helps Codex choose Antom payment products and integration modes, read the latest online Antom documentation, generate integration code, and validate payment, notification, signature, and security requirements.",
+    "displayName": "Antom",
+    "shortDescription": "Antom payment integration guidance and reconciliation report analysis.",
+    "longDescription": "Antom AI tools for Codex: choose payment products and integration modes, read the latest online Antom documentation, generate integration code, validate payment/notification/signature/security, and analyze Settlement Detail reconciliation reports.",
     "developerName": "Antom",
     "category": "Payments",
     "capabilities": [
@@ -35,7 +35,7 @@
     "defaultPrompt": [
       "Help me choose the right Antom payment integration.",
       "Review my Antom payment flow for security issues.",
-      "Generate Antom checkout integration code."
+      "Analyze my Antom Settlement Detail reconciliation report."
     ],
     "brandColor": "#0A22AA",
     "composerIcon": "./assets/logo_antom.svg",

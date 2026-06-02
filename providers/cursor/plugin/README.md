@@ -1,13 +1,16 @@
-# Antom Integration (Cursor)
+# Antom (Cursor)
 
-Antom payment integration guidance for Cursor — product selection, integration
-mode, code generation, and security validation.
+Antom AI tools for Cursor — payment integration guidance (product selection,
+integration mode, code generation, security validation) and Settlement Detail
+reconciliation report analysis.
 
 ## Contents
 
 - `.cursor-plugin/plugin.json`: Cursor plugin manifest.
-- `skills/antom-integration/SKILL.md`: Antom integration skill (Cursor will
-  trigger this skill automatically based on the prompt).
+- `skills/antom-integration/SKILL.md`: Antom payment integration skill (Cursor
+  will trigger this skill automatically based on the prompt).
+- `skills/antom-reconciliation-expert/SKILL.md`: Settlement Detail
+  reconciliation analysis skill.
 - `assets/logo_antom.svg`: Plugin logo shown in the marketplace.
 
 ## Capabilities
@@ -38,7 +41,7 @@ Generate Antom checkout integration code.
 
 ## Local Test
 
-Copy this directory into `~/.cursor/plugins/local/antom-integration` and
+Copy this directory into `~/.cursor/plugins/local/antom` and
 restart Cursor (>= 2.6). Symlinks are not currently supported by the local
 plugin loader.
 

@@ -12,4 +12,4 @@ directory so every provider receives the same Antom integration guidance.
 
 | Provider | Path |
 | --- | --- |
-| Codex | `providers/codex/plugins/antom-integration` |
+| Codex | `providers/codex/plugins/antom` |

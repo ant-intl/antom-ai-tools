@@ -10,9 +10,9 @@
   },
   "plugins": [
     {
-      "name": "antom-integration",
+      "name": "antom",
       "source": "./providers/claude/plugin/",
-      "description": "Antom payment integration guidance for Claude Code.",
+      "description": "Antom AI tools for Claude Code: payment integration guidance and reconciliation report analysis.",
       "version": "0.1.0",
       "author": {
         "name": "Antom"

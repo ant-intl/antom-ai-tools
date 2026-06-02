@@ -6,9 +6,9 @@
   },
   "plugins": [
     {
-      "name": "antom-integration",
-      "source": "./providers/codex/plugins/antom-integration/",
-      "description": "Antom payment integration guidance for Codex",
+      "name": "antom",
+      "source": "./providers/codex/plugins/antom/",
+      "description": "Antom AI tools for Codex: payment integration guidance and reconciliation report analysis",
       "version": "0.1.0",
       "author": {
         "name": "Antom"

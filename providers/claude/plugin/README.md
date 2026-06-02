@@ -1,13 +1,16 @@
-# Antom Integration (Claude Code)
+# Antom (Claude Code)
 
-Antom payment integration guidance for Claude Code — product selection,
-integration mode, code generation, and security validation.
+Antom AI tools for Claude Code — payment integration guidance (product
+selection, integration mode, code generation, security validation) and
+Settlement Detail reconciliation report analysis.
 
 ## Contents
 
 - `.claude-plugin/plugin.json`: Claude Code plugin manifest.
-- `skills/antom-integration/SKILL.md`: Antom integration skill (Claude will
-  trigger this skill automatically based on the prompt).
+- `skills/antom-integration/SKILL.md`: Antom payment integration skill (Claude
+  will trigger this skill automatically based on the prompt).
+- `skills/antom-reconciliation-expert/SKILL.md`: Settlement Detail
+  reconciliation analysis skill.
 
 ## Capabilities
 
@@ -41,8 +44,8 @@ From the repository root, register this repo as a local marketplace and
 install the plugin:
 
 ```text
-/plugin marketplace add /absolute/path/to/ai-antom
-/plugin install antom-integration@antom
+/plugin marketplace add /absolute/path/to/antom-ai-tools
+/plugin install antom@antom
 ```
 
 Validate the marketplace metadata with the official CLI:

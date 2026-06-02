@@ -1,6 +1,6 @@
 {
-  "name": "antom-integration",
-  "description": "Antom payment integration guidance: product selection, integration mode (Payment Element / Checkout / API-only), and security validation.",
+  "name": "antom",
+  "description": "Antom AI tools: payment integration guidance (product selection, integration mode, security validation) and reconciliation report analysis.",
   "version": "0.1.0",
   "author": {
     "name": "Antom",

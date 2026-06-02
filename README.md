@@ -15,10 +15,12 @@ Each Skill is packaged for every major AI code editor and agent platform, so you
 
 | Platform | Type | Name | Source |
 |----------|------|------|--------|
-| Cursor | Plugin | `antom-integration` | [`providers/cursor/plugin`](providers/cursor/plugin) |
-| Claude Code | Plugin | `antom-integration` | [`providers/claude/plugin`](providers/claude/plugin) |
-| Codex | Plugin | `antom-integration` | [`providers/codex/plugins/antom-integration`](providers/codex/plugins/antom-integration) |
+| Cursor | Plugin | `antom` | [`providers/cursor/plugin`](providers/cursor/plugin) |
+| Claude Code | Plugin | `antom` | [`providers/claude/plugin`](providers/claude/plugin) |
+| Codex | Plugin | `antom` | [`providers/codex/plugins/antom`](providers/codex/plugins/antom) |
 | OpenClaw | Skill | `antom-reconciliation-expert` | [`skills/antom-reconciliation-expert`](skills/antom-reconciliation-expert) |
+
+The `antom` plugin bundles every skill (`antom-integration` and `antom-reconciliation-expert`); installing it once makes all of them available.
 
 ## antom-integration
 
@@ -35,7 +37,7 @@ This Skill helps AI quickly load the Antom knowledge base, answer Antom integrat
 Submit / install via the Cursor marketplace, or for local development:
 
 ```bash
-cp -R providers/cursor/plugin ~/.cursor/plugins/local/antom-integration
+cp -R providers/cursor/plugin ~/.cursor/plugins/local/antom
 # then restart Cursor (>= 2.6)
 ```
 
@@ -45,7 +47,7 @@ Marketplace entry: [`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplac
 
 ```text
 /plugin marketplace add ant-intl/antom-ai-tools
-/plugin install antom-integration@antom
+/plugin install antom@antom
 ```
 
 For local development, point the marketplace at the working copy:
@@ -66,7 +68,7 @@ Marketplace entry: [`.claude-plugin/marketplace.json`](.claude-plugin/marketplac
 
 Marketplace entry: [`.codex-plugin/marketplace.json`](.codex-plugin/marketplace.json) (legacy importer reads `.agents/plugins/marketplace.json`).
 
-Plugin manifest: [`providers/codex/plugins/antom-integration/.codex-plugin/plugin.json`](providers/codex/plugins/antom-integration/.codex-plugin/plugin.json)
+Plugin manifest: [`providers/codex/plugins/antom/.codex-plugin/plugin.json`](providers/codex/plugins/antom/.codex-plugin/plugin.json)
 
 ### Example Prompts
 
@@ -165,7 +167,7 @@ The script copies every file under `skills/<name>/` into:
 
 - `providers/cursor/plugin/skills/<name>/`
 - `providers/claude/plugin/skills/<name>/`
-- `providers/codex/plugins/<name>/skills/<name>/`
+- `providers/codex/plugins/antom/skills/<name>/`
 
 Run it before committing skill changes so all editors stay in lockstep.
 
