@@ -68,6 +68,21 @@ Marketplace entry: [`.codex-plugin/marketplace.json`](.codex-plugin/marketplace.
 
 Plugin manifest: [`providers/codex/plugins/antom-integration/.codex-plugin/plugin.json`](providers/codex/plugins/antom-integration/.codex-plugin/plugin.json)
 
+### Test Assets
+
+When you ask AI for a test card or to test a payment, it pulls the latest sandbox test data straight from the official Antom docs (never hardcoded):
+
+| Source | Use |
+|--------|-----|
+| [`docs.antom.com/ac/ref/card.md`](https://docs.antom.com/ac/ref/card.md) | Sandbox test cards (fetched live): success / failure / 3DS / risk-control / invalid-input scenarios |
+| [`docs.antom.com/ac/cashierpay/testcases.md`](https://docs.antom.com/ac/cashierpay/testcases.md) | Go-live validation checklist (production test cases) |
+
+In Claude Code, the plugin also exposes a slash command:
+
+```text
+/test-cards
+```
+
 ### Example Prompts
 
 ```text
