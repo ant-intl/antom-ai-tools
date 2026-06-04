@@ -4,7 +4,7 @@
 // Targets:
 //   - providers/cursor/plugin/skills/<skill>/...
 //   - providers/claude/plugin/skills/<skill>/...
-//   - providers/codex/plugins/<skill>/skills/<skill>/...
+//   - providers/codex/plugins/antom-integration/skills/<skill>/...
 //
 // Usage:
 //   node scripts/sync-skills.mjs
@@ -19,9 +19,12 @@ const repoRoot = path.resolve(path.dirname(__filename), "..");
 
 const SOURCE_DIR = path.join(repoRoot, "skills");
 
-// Codex packages each skill under its own plugin directory, so the per-skill
-// destination is computed dynamically below.
-const CODEX_PLUGINS_DIR = path.join(repoRoot, "providers/codex/plugins");
+// Codex bundles every skill under the single antom-integration plugin, so all
+// skills share one plugin's skills/ directory (one plugin, multiple skills).
+const CODEX_SKILLS_DIR = path.join(
+  repoRoot,
+  "providers/codex/plugins/antom-integration/skills",
+);
 
 const FLAT_TARGETS = [
   path.join(repoRoot, "providers/cursor/plugin/skills"),
@@ -60,8 +63,8 @@ const run = async () => {
     const skillSource = path.join(SOURCE_DIR, skill);
     const targets = [
       ...FLAT_TARGETS.map((base) => path.join(base, skill)),
-      // Codex layout: providers/codex/plugins/<skill>/skills/<skill>/
-      path.join(CODEX_PLUGINS_DIR, skill, "skills", skill),
+      // Codex layout: providers/codex/plugins/antom-integration/skills/<skill>/
+      path.join(CODEX_SKILLS_DIR, skill),
     ];
 
     for await (const file of walk(skillSource)) {
