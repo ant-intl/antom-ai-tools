@@ -75,12 +75,14 @@ When you ask AI for a test card or to test a payment, it pulls the latest sandbo
 | Source | Use |
 |--------|-----|
 | [`docs.antom.com/ac/ref/card.md`](https://docs.antom.com/ac/ref/card.md) | Sandbox test cards (fetched live): success / failure / 3DS / risk-control / invalid-input scenarios |
+| [`docs.antom.com/ac/ref/wallet.md`](https://docs.antom.com/ac/ref/wallet.md) · [`testwallet.md`](https://docs.antom.com/ac/ref/testwallet.md) | How to test wallet / BNPL / online-banking (APM) payments: test wallet app + QR / login flow |
 | [`docs.antom.com/ac/cashierpay/testcases.md`](https://docs.antom.com/ac/cashierpay/testcases.md) | Go-live validation checklist (production test cases) |
 
-In Claude Code, the plugin also exposes a slash command:
+In Claude Code, the plugin also exposes slash commands:
 
 ```text
 /test-cards
+/test-wallet
 ```
 
 ### Example Prompts
