@@ -18,3 +18,4 @@ From that document, present:
 4. A reminder of the sandbox input rules (any CVC/expiry/postal code) and that these only work in the sandbox gateway.
 
 If the user named a specific scenario (e.g. "a card that fails", "test 3DS", "a Brazilian Visa"), lead with the matching card. Always close with the red line: the client-side result is untrustworthy — confirm payment via async notification or the query API.
+If the user is currently working on test code, offer to generate test cases using these cards.
