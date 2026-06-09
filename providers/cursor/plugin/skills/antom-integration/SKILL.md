@@ -34,14 +34,18 @@ Read [Product Decision](https://cdn.marmot-cloud.com/page/antom-integration-doc/
 - [ ] SDK Selection has been read
 - [ ] Product documentation has been read (required recursive reading items: Quick Start, API List, Asynchronous Notification, SampleCode Instructions)
 
+# Integration Companion Guides
+
+- **Post-code guidance (mandatory)**: After code is written, guidance must be provided. Tell users what conditions must be met to go live. Never output bare URLs as user guidance. never stop at "code is done". Proactively guide the user through the remaining stages by reading the corresponding companion docs and presenting key actions inline:
+    1. **Credentials & config** → read [Onboarding Guide](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/onboarding.md), ensure user has sandbox ClientId/keys configured and project is runnable
+    2. **Sandbox testing** → read [Sandbox Guide](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/sandbox-guide.md), walk user through first end-to-end payment (cards/wallets/APMs) and disclose sandbox limitations
+    3. **self-check** → read [Self-Check List](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/self-check.md), guide users on items that sandbox cannot cover but must be verified.
+
+- **On-demand trigger**: If the user asks about credentials/registration, sandbox testing, check list, or go-live readiness at any point (even before code is written), read the matching doc above and respond inline.
 
 # Integration Validation
 
 Perform validation during integration and before production launch to ensure signature verification, asynchronous notifications, and exception handling meet specifications. Validation results are for reference only; developers must check against the latest Antom Open Platform documentation. See: [Integration Checklist](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/checklist.md)
-
-
-# Information Retrieval
-Keys, gateway URL selection, ClientId and all other content retrieval: [Antom Official Website](https://www.antom.com/start-now?portal_channel=Antom_Website_Developer_Community&utm_source=developer_community&utm_medium=referral&utm_campaign=dev_register&utm_content=skill)
 
 
 # Security Red Lines
