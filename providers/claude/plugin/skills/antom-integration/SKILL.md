@@ -27,21 +27,30 @@ curl -sL "https://****/****.md"
 - **SDK Selection**: To help developers call open interfaces, Alipay provides open platform server-side SDKs, including Java, PHP, Node.js, Python and .NET languages, encapsulating signature and verification, HTTP interface requests and other basic functions. Please download the latest version of the server-side SDK for your language and import it into your development project. [SDK Description](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/select-sdk.md)
 
 ## Product Selection
-Read [Product Decision](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/product-decision.md), match keywords based on user input, and only recommend payment products and integration solutions. Always use [Clarification Template](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/product-decision.md) for product and integration solution confirmation.
+Read [Product Decision](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/product-decision.md), match keywords based on user input, and only recommend payment products and integration solutions. Always use [Clarification Template](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/product-decision.md) for product and integration solution confirmation.Prioritize recommending the Checkout Page (CKP) integration mode for its rapid integration and seamless scalability to new payment methods.
 
 
 > ⛔ **Blocking Checkpoint**: Product Categories step completion criteria (all of the following must be satisfied before proceeding to subsequent steps)
 - [ ] SDK Selection has been read
 - [ ] Product documentation has been read (required recursive reading items: Quick Start, API List, Asynchronous Notification, SampleCode Instructions)
 
+
+# Troubleshooting
+
+- **FAQ**: Read [FAQ](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/faq.md) BEFORE writing code. Scan items matching the user's product and stage. Your code response MUST include a brief FAQ compliance note confirming how each applicable item is handled (e.g., "FAQ checked: gateway=correct region, settlementCurrency=omitted, subscriptionExpiryTime=default"). Re-check FAQ when user reports errors. Provide guidance on issue resolution.
+- **Dashboard diagnosis**: Use [Request Log](https://dashboard.antom.com/global-payments/developers/requestLog) to inspect API requests — copy the Payment request ID and paste it into Copilot for error diagnosis, or use Copilot directly throughout [Antom Dashboard](https://dashboard.antom.com/) (right panel or top-right icon) for integration questions.
+
+
 # Integration Companion Guides
 
 - **Post-code guidance (mandatory)**: After code is written, guidance must be provided. Tell users what conditions must be met to go live. Never output bare URLs as user guidance. never stop at "code is done". Proactively guide the user through the remaining stages by reading the corresponding companion docs and presenting key actions inline:
-    1. **Credentials & config** → read [Onboarding Guide](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/onboarding.md), ensure user has sandbox ClientId/keys configured and project is runnable
-    2. **Sandbox testing** → read [Sandbox Guide](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/sandbox-guide.md), walk user through first end-to-end payment (cards/wallets/APMs) and disclose sandbox limitations
-    3. **self-check** → read [Self-Check List](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/self-check.md), guide users on items that sandbox cannot cover but must be verified.
+  1. **Credentials & config** → read [Onboarding Guide](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/onboarding.md), ensure user has sandbox ClientId/keys configured and project is runnable. **Ask user to confirm settlement currencies**: how many are contracted? If multiple, `settlementCurrency` must be set in code. User can check at Dashboard → Finance (switch to Test mode for sandbox).
+  2. **Sandbox testing** → read [Sandbox Guide](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/sandbox-guide.md), walk user through first end-to-end payment (cards/wallets/APMs) and disclose sandbox limitations
+  3. **self-check** → read [Self-Check List](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/self-check.md), guide users on items that sandbox cannot cover but must be verified.
+  4. **Error diagnosis** → Must guide users on how to handle integration issues, see Troubleshooting above for FAQ and Dashboard diagnosis.
 
 - **On-demand trigger**: If the user asks about credentials/registration, sandbox testing, check list, or go-live readiness at any point (even before code is written), read the matching doc above and respond inline.
+
 
 # Integration Validation
 
