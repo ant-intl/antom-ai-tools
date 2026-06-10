@@ -16,6 +16,9 @@ import requests
 RULES_BASE_URL = "https://cdn.marmot-cloud.com/page/antom_bill_reconciliation_doc/rules"
 WIKI_BASE_URL = "https://cdn.marmot-cloud.com/page/antom_bill_reconciliation_doc/wiki"
 
+# Skill version — must stay in sync with SKILL.md frontmatter `version`
+SKILL_VERSION = "1.0.0"
+
 # Logging configuration
 logger = logging.getLogger(__name__)
 
@@ -158,3 +161,84 @@ def load_wiki_index(timeout: int = 5) -> str:
         Wiki index page content
     """
     return load_wiki('index.md', timeout)
+
+
+# ── Version check ─────────────────────────────────────────────────────────────
+
+def _version_lt(v1: str, v2: str) -> bool:
+    """Compare semver strings: True if v1 < v2."""
+    parts1 = [int(x) for x in v1.split(".")]
+    parts2 = [int(x) for x in v2.split(".")]
+    return parts1 < parts2
+
+
+def check_version(timeout: int = 5) -> dict:
+    """
+    Check local SKILL_VERSION against the CDN version manifest.
+
+    The manifest (``rules/version-manifest.json``) declares:
+      - min_skill_version: minimum skill version required by current CDN rules
+      - latest_skill_version: newest published skill version
+      - release_notes: one-line summary of the latest release
+
+    Returns:
+        dict with keys:
+          - current (str): local SKILL_VERSION
+          - min_required (str | None): min_skill_version from manifest
+          - latest (str | None): latest_skill_version from manifest
+          - release_notes (str): release summary from manifest (empty string if absent)
+          - needs_update (bool): True when current < min_required
+          - has_newer (bool): True when a newer version exists
+          - message (str): human-readable upgrade notice (empty if up-to-date)
+          - error (str | None): error message if manifest fetch failed
+    """
+    result = {
+        "current": SKILL_VERSION,
+        "min_required": None,
+        "latest": None,
+        "release_notes": "",
+        "needs_update": False,
+        "has_newer": False,
+        "message": "",
+        "error": None,
+    }
+    manifest_url = f"{RULES_BASE_URL}/version-manifest.json"
+    try:
+        resp = requests.get(manifest_url, timeout=timeout)
+        resp.raise_for_status()
+        manifest = resp.json()
+    except Exception as e:
+        logger.debug(f"Version manifest fetch failed: {e}")
+        result["error"] = str(e)
+        return result
+
+    min_v = manifest.get("min_skill_version", "0.0.0")
+    latest_v = manifest.get("latest_skill_version", SKILL_VERSION)
+    notes = manifest.get("release_notes", "")
+    result["min_required"] = min_v
+    result["latest"] = latest_v
+    result["release_notes"] = notes
+
+    needs_update = _version_lt(SKILL_VERSION, min_v)
+    has_newer = _version_lt(SKILL_VERSION, latest_v)
+    result["needs_update"] = needs_update
+    result["has_newer"] = has_newer
+
+    notes_suffix = f" ({notes})" if notes else ""
+
+    if needs_update:
+        result["message"] = (
+            f"Your Reconciliation Expert is v{SKILL_VERSION}, "
+            f"but v{min_v}+ is required by the latest rules"
+            f"{notes_suffix}. "
+            f"Please update the skill to ensure accurate analysis."
+        )
+    elif has_newer:
+        result["message"] = (
+            f"Reconciliation Expert v{latest_v} is available"
+            f"{notes_suffix} "
+            f"(you have v{SKILL_VERSION}). "
+            f"Consider updating for the latest improvements."
+        )
+
+    return result

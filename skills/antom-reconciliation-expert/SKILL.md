@@ -1,5 +1,6 @@
 ---
 name: antom-reconciliation-expert
+version: "1.0.0"
 description: "Reconciliation Report Analysis Expert - Parses ONLY local Settlement Detail report files (SETTLEMENT_DETAIL_*.csv / .xlsx) for settlement amount validation, fee analysis, and reconciliation knowledge Q&A. Does NOT support Transaction Detail or Settlement Summary reports. Triggers: settlement detail parsing, settlement amount validation, fee analysis, fee model, reconciliation knowledge, interchangeFee, schemeFee, fee rules, settlement, attribution."
 ---
 
@@ -75,7 +76,38 @@ Wiki:   https://cdn.marmot-cloud.com/page/antom_bill_reconciliation_doc/wiki/
 - ❌ "Parse this `report.pdf` / `report.xls` / `report.txt`" → Reject with the file-format constraint wording
 - ❌ "Analyze this `TRANSACTION_DETAIL_xxx.xlsx` (no SETTLEMENT) / `SETTLEMENT_SUMMARY_xxx.csv` (no DETAIL)" → Filename mismatch → reject with the report-type wording
 
-## 0.2 Merchant-Facing Language Policy (MANDATORY)
+## 0.2 Version Check (Mandatory on First Call)
+
+The skill's local scripts (parser, validators, constants) are **version-locked** to the CDN rules. When CDN rules evolve to depend on newer script capabilities, an outdated local skill may produce incorrect results.
+
+**Procedure** (execute once per session, before any business capability):
+
+1. Call `check_version()` from `cdn_loader`
+2. If `needs_update == True` → **stop and show the user the `message`**, do NOT proceed with analysis (CDN rules are incompatible with the local scripts)
+3. If `has_newer == True` → show the `message` as a non-blocking tip, then proceed normally
+4. If the manifest fetch fails (`error` is set) → proceed silently (do not block the user on a network issue)
+
+**CDN manifest format** (`rules/version-manifest.json`):
+```json
+{
+  "min_skill_version": "1.0.0",
+  "latest_skill_version": "1.0.0",
+  "release_notes": "Initial release"
+}
+```
+
+**Version semantics**:
+
+| Change Type | Bump | Example |
+|-------------|------|----------|
+| Bug fix, minor script improvement | Patch (x.x.**Z**) | 1.0.0 → 1.0.1 |
+| New constraint / capability, SKILL.md rule change | Minor (x.**Y**.0) | 1.0.0 → 1.1.0 |
+| Breaking change (e.g., DSL syntax incompatibility) | Major (**X**.0.0) | 1.0.0 → 2.0.0 |
+| CDN knowledge update only | No skill version change | — |
+
+> When bumping the version, update **both** `SKILL.md` frontmatter `version` **and** `cdn_loader.SKILL_VERSION` in the same commit.
+
+## 0.3 Merchant-Facing Language Policy (MANDATORY)
 
 All replies to the user are read by **merchants/finance operators**, not engineers. Internal technical jargon MUST be translated into business language. The following terms are STRICTLY FORBIDDEN in any user-visible output:
 
@@ -181,6 +213,7 @@ The following documents are stored on CDN and dynamically loaded via `scripts/re
 | `load_workflow(name)` | `rules/workflows/{name}.md` | Optional reference |
 | `load_wiki_index()` | `wiki/index.md` | During knowledge retrieval |
 | `load_wiki(path)` | `wiki/{path}` | Loaded after extracting path from index.md |
+| `check_version()` | `rules/version-manifest.json` | First call per session (mandatory) |
 
 ## 4. Guardrails
 
