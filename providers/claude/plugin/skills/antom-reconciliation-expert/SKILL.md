@@ -1,5 +1,6 @@
 ---
 name: antom-reconciliation-expert
+version: "1.0.0"
 description: "Reconciliation Report Analysis Expert - Parses ONLY local Settlement Detail report files (SETTLEMENT_DETAIL_*.csv / .xlsx) for settlement amount validation, fee analysis, and reconciliation knowledge Q&A. Does NOT support Transaction Detail or Settlement Summary reports. Triggers: settlement detail parsing, settlement amount validation, fee analysis, fee model, reconciliation knowledge, interchangeFee, schemeFee, fee rules, settlement, attribution."
 ---
 
@@ -75,7 +76,30 @@ Wiki:   https://cdn.marmot-cloud.com/page/antom_bill_reconciliation_doc/wiki/
 - ❌ "Parse this `report.pdf` / `report.xls` / `report.txt`" → Reject with the file-format constraint wording
 - ❌ "Analyze this `TRANSACTION_DETAIL_xxx.xlsx` (no SETTLEMENT) / `SETTLEMENT_SUMMARY_xxx.csv` (no DETAIL)" → Filename mismatch → reject with the report-type wording
 
-## 0.2 Merchant-Facing Language Policy (MANDATORY)
+## 0.2 Version Check (Mandatory on First Call)
+
+**Procedure** (execute once per session, before any business capability):
+
+1. Call `check_version()` from `cdn_loader`
+2. If `needs_update == True` → show the user the `message`, then **ask the user whether to proceed**:
+    - User confirms update → stop analysis, generate an appropriate update command (see table below), and guide the user to run it. Do NOT proceed with the current session.
+    - User declines update → proceed with analysis using the current version (the user accepts the risk of potential incompatibility)
+3. If `has_newer == True` → show the `message` as a non-blocking tip, then proceed normally
+4. If the manifest fetch fails (`error` is set) → proceed silently (do not block the user on a network issue)
+
+> **Update action**: When the user confirms an update, determine the installation method and guide the user accordingly. The `check_version()` return dict includes `repo` (source repository URL) and `repo_path` (skill directory path within the repo) — use them to construct concrete commands. `<current-skill-dir>` refers to the directory containing this SKILL.md file.
+>
+> | Scenario | Detection | Update Action |
+> |----------|-----------|---------------|
+> | Skill is inside a git repo | `git rev-parse --show-toplevel` succeeds under the skill directory | `cd <repo-root> && git pull` |
+> | Skill is NOT in a git repo, git is available | `git rev-parse` fails but `git` command exists | 1) `git clone <repo>` to a temporary directory; 2) `cp -r <tmp>/<repo_path> <current-skill-dir>` to replace |
+> | Skill is NOT in a git repo, git is unavailable | `git` command not found | Download the repository as a zip from `<repo>`, extract, then copy `<repo_path>` to `<current-skill-dir>` |
+>
+> ⛔ **NEVER** suggest `git pull` in a non-git directory. Never expose the raw `repo` URL or technical internals to the merchant — present only the actionable command or friendly reinstall instructions.
+>
+> ⚠️ After the update completes, the user **must start a new session** — the current session still runs the old code (already loaded into memory).
+
+## 0.3 Merchant-Facing Language Policy (MANDATORY)
 
 All replies to the user are read by **merchants/finance operators**, not engineers. Internal technical jargon MUST be translated into business language. The following terms are STRICTLY FORBIDDEN in any user-visible output:
 
@@ -181,6 +205,7 @@ The following documents are stored on CDN and dynamically loaded via `scripts/re
 | `load_workflow(name)` | `rules/workflows/{name}.md` | Optional reference |
 | `load_wiki_index()` | `wiki/index.md` | During knowledge retrieval |
 | `load_wiki(path)` | `wiki/{path}` | Loaded after extracting path from index.md |
+| `check_version()` | `rules/version-manifest.json` | First call per session (mandatory) |
 
 ## 4. Guardrails
 
