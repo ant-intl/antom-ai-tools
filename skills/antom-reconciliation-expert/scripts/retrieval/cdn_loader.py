@@ -8,6 +8,7 @@ Wiki Base URL: https://cdn.marmot-cloud.com/page/antom_bill_reconciliation_doc/w
 """
 
 import logging
+import re
 from typing import Optional
 
 import requests
@@ -19,6 +20,10 @@ WIKI_BASE_URL = "https://cdn.marmot-cloud.com/page/antom_bill_reconciliation_doc
 # Skill version — must stay in sync with SKILL.md frontmatter `version`
 SKILL_VERSION = "1.0.0"
 
+# Skill source repository — metadata for agent to generate update commands
+SKILL_REPO = "https://github.com/ant-intl/antom-ai-tools"
+SKILL_REPO_PATH = "antom-reconciliation-expert"
+
 # Logging configuration
 logger = logging.getLogger(__name__)
 
@@ -26,11 +31,11 @@ logger = logging.getLogger(__name__)
 def _fetch_from_cdn(relative_path: str, timeout: int = 5) -> str:
     """
     Fetch rules specification documents from CDN.
-    
+
     Args:
         relative_path: Relative path, e.g., 'workflows/comprehensive-analysis.md'
         timeout: Request timeout in seconds
-    
+
     Returns:
         Document content, empty string on failure
     """
@@ -50,11 +55,11 @@ def _fetch_from_cdn(relative_path: str, timeout: int = 5) -> str:
 def _fetch_from_wiki(filename: str, timeout: int = 5) -> str:
     """
     Fetch content from CDN Wiki.
-    
+
     Args:
         filename: Wiki filename, e.g., 'index.md', 'fee-and-amount.md'
         timeout: Request timeout in seconds
-    
+
     Returns:
         Document content, empty string on failure
     """
@@ -84,10 +89,10 @@ def load_doc(relative_path: str, timeout: int = 5) -> str:
 def load_workflow(name: str) -> str:
     """
     Load workflow document.
-    
+
     Args:
         name: Workflow name, e.g., 'comprehensive-analysis', 'validation', 'transaction-tracing', 'fee-analysis'
-    
+
     Returns:
         Workflow document content
     """
@@ -97,7 +102,7 @@ def load_workflow(name: str) -> str:
 def load_capabilities() -> str:
     """
     Load capability definition document.
-    
+
     Returns:
         Capability definition document content
     """
@@ -107,7 +112,7 @@ def load_capabilities() -> str:
 def load_constraints() -> str:
     """
     Load constraint specification details.
-    
+
     Returns:
         Constraint specification document content
     """
@@ -117,7 +122,7 @@ def load_constraints() -> str:
 def load_tools() -> str:
     """
     Load tool specification manual.
-    
+
     Returns:
         Tool specification document content
     """
@@ -127,7 +132,7 @@ def load_tools() -> str:
 def load_guardrails() -> str:
     """
     Load Guardrails specification cases.
-    
+
     Returns:
         Guardrails specification document content
     """
@@ -139,11 +144,11 @@ def load_guardrails() -> str:
 def load_wiki(relative_path: str, timeout: int = 5) -> str:
     """
     Load Wiki knowledge base document: read directly from CDN.
-    
+
     Args:
         relative_path: Wiki relative path, e.g., 'index.md', 'entities/amount-fields.md'
         timeout: Request timeout in seconds
-    
+
     Returns:
         Document content string, empty string on failure
     """
@@ -153,10 +158,10 @@ def load_wiki(relative_path: str, timeout: int = 5) -> str:
 def load_wiki_index(timeout: int = 5) -> str:
     """
     Load Wiki knowledge base index page (scenario navigation).
-    
+
     Args:
         timeout: Request timeout in seconds
-    
+
     Returns:
         Wiki index page content
     """
@@ -165,11 +170,24 @@ def load_wiki_index(timeout: int = 5) -> str:
 
 # ── Version check ─────────────────────────────────────────────────────────────
 
+def _parse_version(v: str) -> list:
+    """Parse semver string into [major, minor, patch] integers.
+
+    Tolerates non-numeric prefixes (e.g. 'v1.0.0') and suffixes
+    (e.g. '1.0.0-beta'). Short versions (e.g. '1.0') are zero-padded
+    to three segments so that '1.0' equals '1.0.0'.
+    """
+    parts = re.findall(r'\d+', v)
+    if not parts:
+        return [0, 0, 0]
+    while len(parts) < 3:
+        parts.append('0')
+    return [int(x) for x in parts[:3]]
+
+
 def _version_lt(v1: str, v2: str) -> bool:
     """Compare semver strings: True if v1 < v2."""
-    parts1 = [int(x) for x in v1.split(".")]
-    parts2 = [int(x) for x in v2.split(".")]
-    return parts1 < parts2
+    return _parse_version(v1) < _parse_version(v2)
 
 
 def check_version(timeout: int = 5) -> dict:
@@ -184,6 +202,8 @@ def check_version(timeout: int = 5) -> dict:
     Returns:
         dict with keys:
           - current (str): local SKILL_VERSION
+          - repo (str): skill source repository URL (for agent to generate update commands)
+          - repo_path (str): skill directory path within the repository
           - min_required (str | None): min_skill_version from manifest
           - latest (str | None): latest_skill_version from manifest
           - release_notes (str): release summary from manifest (empty string if absent)
@@ -194,6 +214,8 @@ def check_version(timeout: int = 5) -> dict:
     """
     result = {
         "current": SKILL_VERSION,
+        "repo": SKILL_REPO,
+        "repo_path": SKILL_REPO_PATH,
         "min_required": None,
         "latest": None,
         "release_notes": "",

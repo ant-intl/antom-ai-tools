@@ -78,34 +78,26 @@ Wiki:   https://cdn.marmot-cloud.com/page/antom_bill_reconciliation_doc/wiki/
 
 ## 0.2 Version Check (Mandatory on First Call)
 
-The skill's local scripts (parser, validators, constants) are **version-locked** to the CDN rules. When CDN rules evolve to depend on newer script capabilities, an outdated local skill may produce incorrect results.
-
 **Procedure** (execute once per session, before any business capability):
 
 1. Call `check_version()` from `cdn_loader`
-2. If `needs_update == True` → **stop and show the user the `message`**, do NOT proceed with analysis (CDN rules are incompatible with the local scripts)
+2. If `needs_update == True` → show the user the `message`, then **ask the user whether to proceed**:
+    - User confirms update → stop analysis, generate an appropriate update command (see table below), and guide the user to run it. Do NOT proceed with the current session.
+    - User declines update → proceed with analysis using the current version (the user accepts the risk of potential incompatibility)
 3. If `has_newer == True` → show the `message` as a non-blocking tip, then proceed normally
 4. If the manifest fetch fails (`error` is set) → proceed silently (do not block the user on a network issue)
 
-**CDN manifest format** (`rules/version-manifest.json`):
-```json
-{
-  "min_skill_version": "1.0.0",
-  "latest_skill_version": "1.0.0",
-  "release_notes": "Initial release"
-}
-```
-
-**Version semantics**:
-
-| Change Type | Bump | Example |
-|-------------|------|----------|
-| Bug fix, minor script improvement | Patch (x.x.**Z**) | 1.0.0 → 1.0.1 |
-| New constraint / capability, SKILL.md rule change | Minor (x.**Y**.0) | 1.0.0 → 1.1.0 |
-| Breaking change (e.g., DSL syntax incompatibility) | Major (**X**.0.0) | 1.0.0 → 2.0.0 |
-| CDN knowledge update only | No skill version change | — |
-
-> When bumping the version, update **both** `SKILL.md` frontmatter `version` **and** `cdn_loader.SKILL_VERSION` in the same commit.
+> **Update action**: When the user confirms an update, determine the installation method and guide the user accordingly. The `check_version()` return dict includes `repo` (source repository URL) and `repo_path` (skill directory path within the repo) — use them to construct concrete commands. `<current-skill-dir>` refers to the directory containing this SKILL.md file.
+>
+> | Scenario | Detection | Update Action |
+> |----------|-----------|---------------|
+> | Skill is inside a git repo | `git rev-parse --show-toplevel` succeeds under the skill directory | `cd <repo-root> && git pull` |
+> | Skill is NOT in a git repo, git is available | `git rev-parse` fails but `git` command exists | 1) `git clone <repo>` to a temporary directory; 2) `cp -r <tmp>/<repo_path> <current-skill-dir>` to replace |
+> | Skill is NOT in a git repo, git is unavailable | `git` command not found | Download the repository as a zip from `<repo>`, extract, then copy `<repo_path>` to `<current-skill-dir>` |
+>
+> ⛔ **NEVER** suggest `git pull` in a non-git directory. Never expose the raw `repo` URL or technical internals to the merchant — present only the actionable command or friendly reinstall instructions.
+>
+> ⚠️ After the update completes, the user **must start a new session** — the current session still runs the old code (already loaded into memory).
 
 ## 0.3 Merchant-Facing Language Policy (MANDATORY)
 
