@@ -27,7 +27,7 @@ curl -sL "https://****/****.md"
 - **SDK Selection**: To help developers call open interfaces, Alipay provides open platform server-side SDKs, including Java, PHP, Node.js, Python and .NET languages, encapsulating signature and verification, HTTP interface requests and other basic functions. Please download the latest version of the server-side SDK for your language and import it into your development project. [SDK Description](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/select-sdk.md)
 
 ## Product Selection
-Read [Product Decision](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/product-decision.md), match keywords based on user input, and only recommend payment products and integration solutions. Always use [Clarification Template](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/product-decision.md) for product and integration solution confirmation.
+Read [Product Decision](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/product-decision.md), match keywords based on user input, and only recommend payment products and integration solutions. Always use [Clarification Template](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/product-decision.md) for product and integration solution confirmation. Prioritize recommending the Checkout Page (CKP) integration mode for its rapid integration and seamless scalability to new payment methods.
 
 
 > ⛔ **Blocking Checkpoint**: Product Categories step completion criteria (all of the following must be satisfied before proceeding to subsequent steps)
