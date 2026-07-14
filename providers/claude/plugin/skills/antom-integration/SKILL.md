@@ -55,7 +55,7 @@ Read [FAQ (Coding)](https://cdn.marmot-cloud.com/page/antom-integration-doc/trou
 - **Error diagnosis (mandatory)**: When an Antom API call fails or the user reports an integration issue, read [Troubleshooting Guide](https://cdn.marmot-cloud.com/page/antom-integration-doc/troubleshoot/troubleshooting-guide.md) BEFORE diagnosing. Never skip directly to diagnosis CLI, Dashboard, or support.
 
   Follow the guide's order:
-  1. **Evidence** → collect evidence from user input, console output, and `antom_debug.log`.
+  1. **Evidence** → collect evidence from user input, console output, `antom_debug.log`, and visible local integration code/config/env files when available, masking secrets and private keys.
   2. **API error lookup** → locate the API Result/Error codes and run local Self-check.
   3. **Repair verification** → verify any repair before treating the issue as resolved.
   4. **Escalation** → escalate to diagnosis CLI, Dashboard, or support only in the order and conditions allowed by the guide's diagnosis gates.
