@@ -51,20 +51,17 @@ Read [FAQ (Coding)](https://cdn.marmot-cloud.com/page/antom-integration-doc/trou
 
 # Troubleshooting
 
-When an error occurs or users report issues, follow this sequence:
 
-1. **Get error details** — from user input, console output, or debug log file (antom_debug.log)
+- **Error diagnosis (mandatory)**: When an Antom API call fails or the user reports an integration issue, read [Troubleshooting Guide](https://cdn.marmot-cloud.com/page/antom-integration-doc/troubleshoot/troubleshooting-guide.md) BEFORE diagnosing. Never skip directly to diagnosis CLI, Dashboard, or support.
 
-2. **Analyze error** — read resultCode + resultMessage
-  - Matches a known error pattern → check [FAQ (Errors)](https://cdn.marmot-cloud.com/page/antom-integration-doc/troubleshoot/faq-errors.md), fix per Action
-  - resultCode/resultMessage states clear cause → look up API endpoint or API name in [API Troubleshooting Index](https://cdn.marmot-cloud.com/page/antom-integration-doc/troubleshoot/api-troubleshooting-index.md), find the corresponding API doc, match resultCode in its Result/Error codes section, follow Further action to fix
-  - Above cannot resolve → proceed to step 3
+  Follow the guide's order:
+  1. **Evidence** → collect evidence from user input, console output, and `antom_debug.log`.
+  2. **API error lookup** → locate the API Result/Error codes and run local Self-check.
+  3. **Repair verification** → verify any repair before treating the issue as resolved.
+  4. **Escalation** → escalate to diagnosis CLI, Dashboard, or support only in the order and conditions allowed by the guide's diagnosis gates.
+  5. **Diagnosis Ledger** → return the compact Diagnosis Ledger defined in the guide.
 
-3. **Dashboard diagnosis** — guide user to:
-  - Search by paymentRequestId in [Request Log](https://dashboard.antom.com/global-payments/developers/requestLog)
-  - Paste request ID into Copilot on [Antom Dashboard](https://dashboard.antom.com/) (right panel or top-right icon) for AI diagnosis
-  - If unresolved, advise user to contact Antom support with requestId and log snippet
-
+- **On-demand trigger**: If the user asks about an integration error, API failure, request/response issue, result code, Dashboard diagnosis, diagnosis CLI, or troubleshooting at any point, read the Troubleshooting Guide and respond inline.
 
 # Integration Companion Guides
 
