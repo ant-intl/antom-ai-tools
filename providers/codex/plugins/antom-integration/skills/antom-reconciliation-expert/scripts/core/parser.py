@@ -1,16 +1,16 @@
 """
 Reconciliation Report Parser
 
-Parses reconciliation report CSV/XLSX files provided by Antom (transaction details, settlement details, settlement summary), supports DSL filtering/aggregation (WHERE/SELECT/GROUP BY/ORDER BY/LIMIT).
+Parse reconciliation report CSV/XLSX files with support for DSL filtering and aggregation
+(WHERE / SELECT / GROUP BY / ORDER BY / LIMIT).
 """
 
 import csv
 import json
 import os
+from decimal import Decimal, ROUND_HALF_EVEN, InvalidOperation
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Union
-from functools import reduce
-import operator
 
 from .constants import (
     ALL_FEE_FIELDS,
@@ -22,14 +22,15 @@ from .constants import (
 
 
 # ============================================================
-# Settlement Detail report type detection (filename + lightweight content sanity)
-# Filename gate is mandatory; content sanity catches obvious renaming/spoofing.
+# Settlement Detail report type gate (filename + lightweight header check)
+# Filename gate is mandatory; header check defends against obvious
+# renames / forgeries.
 # ============================================================
 ALLOWED_EXTENSIONS = (".csv", ".xlsx")
 
 
 class ReportTypeError(ValueError):
-    """Raised when a file is rejected by detect_report_type()."""
+    """Raised by detect_report_type() when a file is rejected."""
 
     def __init__(self, reason: str, file_path: str, kind: str):
         super().__init__(reason)
@@ -55,10 +56,10 @@ def _read_csv_header(file_path: str) -> List[str]:
 def _read_xlsx_header(file_path: str) -> List[str]:
     from openpyxl import load_workbook
 
-    # NOTE: read_only=True can return only the first column for xlsx files
-    # exported by some Antom pipelines (sheet dimension attribute does not
-    # cover the full row range). Use the default (non-read_only) mode and
-    # iterate by ws.max_column to guarantee the entire header row is read.
+    # Note: for some Antom-exported XLSX files, read_only=True may return
+    # only the first column (the sheet's dimension attribute does not cover
+    # the full row range). Use the default (non-read-only) mode and iterate
+    # up to ws.max_column to guarantee a complete header row.
     wb = load_workbook(filename=file_path, data_only=True)
     try:
         ws = wb.active
@@ -75,22 +76,19 @@ def _read_xlsx_header(file_path: str) -> List[str]:
 
 
 def detect_report_type(file_path: str) -> Dict[str, Any]:
-    """Validate a file is a Settlement Detail report.
+    """Validate whether the file is a Settlement Detail report.
 
-    Returns a dict with shape ``{"report_type": "SETTLEMENT_DETAIL", "file_path": ...}``
-    on success. Raises ``ReportTypeError`` otherwise.
+    Returns ``{"report_type": "SETTLEMENT_DETAIL", "file_path": ...}`` on
+    success; raises ``ReportTypeError`` otherwise.
 
-    Detection strategy (cheap → expensive):
-      1. Extension whitelist: ``.csv`` / ``.xlsx`` only.
+    Detection strategy (cheap to expensive):
+      1. Extension allowlist: only ``.csv`` / ``.xlsx``.
       2. Filename gate: must match ``SETTLEMENT_DETAIL_FILENAME_RE``.
-      3. Content sanity (two-layer rule on the header row):
-         a. POSITIVE: header must contain at least
-            ``SETTLEMENT_DETAIL_MIN_CORE_MATCH`` columns from
-            ``SETTLEMENT_DETAIL_CORE_COLUMNS`` (rejects Settlement Summary
-            files renamed as Settlement Detail).
-         b. NEGATIVE: header must NOT contain any column from
-            ``SETTLEMENT_DETAIL_FORBIDDEN_COLUMNS`` (rejects Transaction
-            Detail files renamed as Settlement Detail).
+      3. Header content check (positive + negative):
+         a. Positive: header must match at least ``SETTLEMENT_DETAIL_MIN_CORE_MATCH``
+            columns from ``SETTLEMENT_DETAIL_CORE_COLUMNS`` (rejects renamed Summary).
+         b. Negative: header must not contain any ``SETTLEMENT_DETAIL_FORBIDDEN_COLUMNS``
+            column (rejects renamed Transaction Detail).
     """
     file_name = os.path.basename(file_path)
     ext = os.path.splitext(file_name)[1].lower()
@@ -98,8 +96,8 @@ def detect_report_type(file_path: str) -> Dict[str, Any]:
     if ext not in ALLOWED_EXTENSIONS:
         raise ReportTypeError(
             reason=(
-                "I can only read CSV or XLSX report files. Please re-export the "
-                "report in one of these two formats and send it again."
+                "Only CSV or XLSX report files are accepted. "
+                "Please re-export the report in one of these two formats before submitting."
             ),
             file_path=file_path,
             kind="extension",
@@ -108,12 +106,11 @@ def detect_report_type(file_path: str) -> Dict[str, Any]:
     if not SETTLEMENT_DETAIL_FILENAME_RE.match(file_name):
         raise ReportTypeError(
             reason=(
-                "I can only analyze the Settlement Detail report. The file you "
-                "provided does not look like a Settlement Detail report. Please "
-                "download the Settlement Detail report from the merchant portal "
-                "and send it again. (The filename should contain both "
-                "`SETTLEMENT` and `DETAIL`, e.g. `SETTLEMENT_DETAIL_*.xlsx` or "
-                "`Settlement_Detail_*.csv`.)"
+                "Only Settlement Detail reports can be analyzed. This file does not appear to be a "
+                "Settlement Detail report. Please download a Settlement Detail report from the merchant "
+                "dashboard and resubmit. "
+                "(The filename must contain both `SETTLEMENT` and `DETAIL`, "
+                "e.g. `SETTLEMENT_DETAIL_*.xlsx` or `Settlement_Detail_*.csv`.)"
             ),
             file_path=file_path,
             kind="filename",
@@ -123,40 +120,37 @@ def detect_report_type(file_path: str) -> Dict[str, Any]:
         header = _read_xlsx_header(file_path) if ext == ".xlsx" else _read_csv_header(file_path)
     except Exception as e:
         raise ReportTypeError(
-            reason=f"Cannot read report header for type detection: {e}",
+            reason=f"Failed to read report header; type detection cannot proceed: {e}",
             file_path=file_path,
             kind="content",
         )
 
     header_set = {col for col in header if col}
 
-    # Positive signal: must contain at least N of the canonical SD columns.
+    # Positive signal: must match at least N Settlement Detail core columns
     core_matches = header_set & SETTLEMENT_DETAIL_CORE_COLUMNS
     if len(core_matches) < SETTLEMENT_DETAIL_MIN_CORE_MATCH:
         raise ReportTypeError(
             reason=(
-                "I can only analyze the Settlement Detail report. The file's "
-                "header does not match a Settlement Detail report structure "
-                f"(only {len(core_matches)} of "
-                f"{len(SETTLEMENT_DETAIL_CORE_COLUMNS)} core columns found; "
-                f"at least {SETTLEMENT_DETAIL_MIN_CORE_MATCH} required). "
-                "Please re-download the Settlement Detail report from the "
-                "merchant portal without renaming."
+                "Only Settlement Detail reports can be analyzed. This file's header does not conform "
+                "to the Settlement Detail structure "
+                f"(matched {len(core_matches)}/{len(SETTLEMENT_DETAIL_CORE_COLUMNS)} core columns; "
+                f"at least {SETTLEMENT_DETAIL_MIN_CORE_MATCH} are required). "
+                "Please re-download the Settlement Detail report from the merchant dashboard without renaming it."
             ),
             file_path=file_path,
             kind="content",
         )
 
-    # Negative signal: must not contain any TX-only column.
+    # Negative signal: must not contain TX-exclusive columns
     forbidden_hits = header_set & SETTLEMENT_DETAIL_FORBIDDEN_COLUMNS
     if forbidden_hits:
         raise ReportTypeError(
             reason=(
-                "This file looks like a Transaction Detail report, not a "
-                "Settlement Detail report (it contains transaction-only "
-                f"columns: {sorted(forbidden_hits)}). I can only analyze "
-                "Settlement Detail reports. Please re-download the Settlement "
-                "Detail report from the merchant portal."
+                "This file appears to be a Transaction Detail report, not a Settlement Detail report "
+                f"(contains TX-exclusive columns: {sorted(forbidden_hits)}). "
+                "Only Settlement Detail reports can be analyzed. "
+                "Please re-download the Settlement Detail report from the merchant dashboard."
             ),
             file_path=file_path,
             kind="content",
@@ -166,28 +160,43 @@ def detect_report_type(file_path: str) -> Dict[str, Any]:
 
 
 def get_fee_summary(data: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Return summary of all 17 fee fields at once, eliminating LLM's freedom to selectively choose fields."""
+    """Return a summary of all 20 fee fields in a single pass, eliminating
+    the LLM's freedom to selectively choose fields.
+
+    Uses Decimal arithmetic for financial precision, consistent with validators.py.
+    All values are constructed from strings and quantized to 2 decimal places
+    using ROUND_HALF_EVEN (banker's rounding).
+    """
+    Q = Decimal('0.01')
     fee_details = {}
     non_zero_fields = []
-    total_fees = 0.0
+    total_fees = Decimal('0')
 
     for field in ALL_FEE_FIELDS:
-        field_sum = 0.0
+        field_sum = Decimal('0')
         for row in data:
             val = row.get(field, "")
-            if val and str(val).strip() not in ("", "null"):
-                try:
-                    field_sum += float(val)
-                except (ValueError, TypeError):
-                    pass
-        fee_details[field] = round(field_sum, 2)
+            if val is not None:
+                s = str(val).strip()
+                if s and s.lower() not in ("", "null", "none"):
+                    try:
+                        field_sum += Decimal(s)
+                    except (InvalidOperation, ValueError):
+                        pass
+        field_sum = field_sum.quantize(Q, rounding=ROUND_HALF_EVEN)
+        fee_details[field] = field_sum
         total_fees += field_sum
-        if abs(field_sum) > 0.001:
+        if field_sum != Decimal('0'):
             non_zero_fields.append(field)
 
+    total_fees = total_fees.quantize(Q, rounding=ROUND_HALF_EVEN)
+
+    # Convert Decimal to str for JSON serialization safety while preserving
+    # exact decimal representation (e.g. "59.97" not 59.970000000000006).
+    # Consumers that need numeric operations can Decimal(str_val) safely.
     return {
-        "fee_details": fee_details,
-        "total_fees": round(total_fees, 2),
+        "fee_details": {k: str(v) for k, v in fee_details.items()},
+        "total_fees": str(total_fees),
         "non_zero_fields": non_zero_fields,
         "field_count": {
             "total": len(ALL_FEE_FIELDS),
@@ -206,19 +215,19 @@ except ImportError:
 
 
 def get_dsl_schema() -> Dict[str, Any]:
-    """Get DSL Schema definition."""
+    """Load the DSL schema definition."""
     schema_path = Path(__file__).parent / "dsl_schema.json"
     with open(schema_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 
 def validate_dsl(filters: Dict[str, Any]) -> Optional[str]:
-    """Validate DSL against Schema, return None or error message."""
+    """Validate a DSL object against the schema. Returns None or an error message."""
     if not filters:
         return None
     
     if not HAS_JSONSCHEMA:
-        # jsonschema not installed, skip validation
+        # jsonschema not installed; skip validation
         return None
     
     try:
@@ -230,39 +239,38 @@ def validate_dsl(filters: Dict[str, Any]) -> Optional[str]:
 
 
 class FilterDSL:
-    """Filter DSL Executor"""
+    """DSL filter executor."""
     
     def __init__(self, filters: Optional[Dict[str, Any]] = None):
-        """Initialize DSL executor."""
+        """Initialize the DSL executor."""
         self.filters = filters or {}
     
     def _compare_values(self, actual: Any, op: str, expected: Any) -> bool:
-        """Compare two values, supports =, !=, >, >=, <, <=, IN, NOT IN, LIKE, IS NULL, IS NOT NULL."""
-        # Type conversion
-        try:
-            if isinstance(expected, (int, float)):
-                actual = float(actual)
-        except (ValueError, TypeError):
-            pass
-        
+        """Compare two values; supports =, !=, >, >=, <, <=, IN, NOT IN, LIKE, IS NULL, IS NOT NULL."""
         if op == "=":
             return actual == expected
         elif op == "!=":
             return actual != expected
-        elif op == ">":
-            return float(actual) > float(expected)
-        elif op == ">=":
-            return float(actual) >= float(expected)
-        elif op == "<":
-            return float(actual) < float(expected)
-        elif op == "<=":
-            return float(actual) <= float(expected)
+        elif op in (">", ">=", "<", "<="):
+            try:
+                actual_num = float(actual)
+                expected_num = float(expected)
+            except (ValueError, TypeError):
+                return False
+            if op == ">":
+                return actual_num > expected_num
+            elif op == ">=":
+                return actual_num >= expected_num
+            elif op == "<":
+                return actual_num < expected_num
+            else:
+                return actual_num <= expected_num
         elif op == "IN":
             return actual in expected
         elif op == "NOT IN":
             return actual not in expected
         elif op == "LIKE":
-            # Support % wildcard, escape regex special chars first then restore % wildcard
+            # Support % wildcard: escape regex special chars then restore %
             import re
             escaped = re.escape(expected)
             pattern = escaped.replace("%", ".*")
@@ -275,7 +283,7 @@ class FilterDSL:
             raise ValueError(f"Unsupported operator: {op}")
     
     def _evaluate_condition(self, row: Dict[str, Any], condition: Dict[str, Any]) -> bool:
-        """Evaluate single condition (supports AND/OR nesting)."""
+        """Evaluate a single condition (supports AND/OR nesting)."""
         # AND/OR nesting
         if "AND" in condition:
             return all(self._evaluate_condition(row, c) for c in condition["AND"])
@@ -303,7 +311,7 @@ class FilterDSL:
         return [row for row in rows if self._evaluate_condition(row, where_clause)]
     
     def apply_select(self, rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Apply SELECT column selection."""
+        """Apply SELECT column projection."""
         select_columns = self.filters.get("SELECT")
         if not select_columns:
             return rows
@@ -314,37 +322,51 @@ class FilterDSL:
         ]
     
     def _apply_aggregation(self, rows: List[Dict[str, Any]], agg: Dict[str, Any]) -> Any:
-        """Apply single aggregation function (COUNT/SUM/AVG/MIN/MAX/FIRST/LAST)."""
+        """Apply a single aggregation function (COUNT/SUM/AVG/MIN/MAX/FIRST/LAST).
+
+        Uses Decimal for SUM/AVG/MIN/MAX to ensure financial precision,
+        consistent with get_fee_summary() and validators.py.
+        Returns str for Decimal results (JSON-safe), int for COUNT, raw values for FIRST/LAST.
+        """
+        Q = Decimal('0.01')
         column = agg.get("column")
         func = agg.get("function", "COUNT")
-        
+
         values = [row.get(column) for row in rows]
-        
+
+        def _to_decimal_values(vals):
+            """Safely convert non-empty values to Decimal, skipping unparseable ones
+            (e.g. "null", "N/A") that would otherwise crash a generator-based sum()."""
+            result = []
+            for v in vals:
+                if v is None or v == "":
+                    continue
+                try:
+                    result.append(Decimal(str(v)))
+                except (InvalidOperation, ValueError, TypeError):
+                    continue
+            return result
+
         if func == "COUNT":
             return len([v for v in values if v is not None and v != ""])
         elif func == "SUM":
-            try:
-                return sum(float(v) for v in values if v is not None and v != "")
-            except (ValueError, TypeError):
-                return 0
+            numeric_values = _to_decimal_values(values)
+            if not numeric_values:
+                return "0"
+            total = sum(numeric_values)
+            return str(total.quantize(Q, rounding=ROUND_HALF_EVEN))
         elif func == "AVG":
-            try:
-                numeric_values = [float(v) for v in values if v is not None and v != ""]
-                return sum(numeric_values) / len(numeric_values) if numeric_values else 0
-            except (ValueError, TypeError):
-                return 0
+            numeric_values = _to_decimal_values(values)
+            if not numeric_values:
+                return "0"
+            avg = sum(numeric_values) / len(numeric_values)
+            return str(avg.quantize(Q, rounding=ROUND_HALF_EVEN))
         elif func == "MIN":
-            try:
-                numeric_values = [float(v) for v in values if v is not None and v != ""]
-                return min(numeric_values) if numeric_values else None
-            except (ValueError, TypeError):
-                return None
+            numeric_values = _to_decimal_values(values)
+            return str(min(numeric_values)) if numeric_values else None
         elif func == "MAX":
-            try:
-                numeric_values = [float(v) for v in values if v is not None and v != ""]
-                return max(numeric_values) if numeric_values else None
-            except (ValueError, TypeError):
-                return None
+            numeric_values = _to_decimal_values(values)
+            return str(max(numeric_values)) if numeric_values else None
         elif func == "FIRST":
             return values[0] if values else None
         elif func == "LAST":
@@ -353,7 +375,7 @@ class FilterDSL:
             raise ValueError(f"Unsupported aggregation function: {func}")
     
     def apply_group_by(self, rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Apply GROUP BY grouping aggregation."""
+        """Apply GROUP BY aggregation."""
         group_by_clause = self.filters.get("GROUP_BY")
         if not group_by_clause:
             return rows
@@ -362,14 +384,14 @@ class FilterDSL:
         aggregations = group_by_clause.get("aggregations", [])
         
         if not group_columns:
-            # No grouping columns, aggregate entire dataset
+            # No grouping columns: aggregate the entire dataset
             result = {}
             for agg in aggregations:
                 alias = agg.get("alias", agg.get("column"))
                 result[alias] = self._apply_aggregation(rows, agg)
             return [result]
         
-        # Grouping
+        # Group rows
         groups = {}
         for row in rows:
             key = tuple(row.get(col) for col in group_columns)
@@ -377,7 +399,7 @@ class FilterDSL:
                 groups[key] = []
             groups[key].append(row)
         
-        # Apply aggregation to each group
+        # Apply aggregations per group
         results = []
         for key, group_rows in groups.items():
             result = {col: val for col, val in zip(group_columns, key)}
@@ -389,33 +411,35 @@ class FilterDSL:
         return results
     
     def apply_order_by(self, rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Apply ORDER BY sorting (supports multi-column)."""
+        """Apply ORDER BY sorting (supports multiple columns).
+        Returns a new sorted list without mutating the input."""
         order_by_clause = self.filters.get("ORDER_BY")
         if not order_by_clause:
             return rows
         
-        # Support multi-column sorting
+        result = list(rows)  # shallow copy to avoid mutating input
+        # Multi-column sort (apply in reverse order for stable result)
         for order in reversed(order_by_clause):
             column = order.get("column")
             direction = order.get("direction", "ASC").upper()
             reverse = (direction == "DESC")
             
             try:
-                rows.sort(
+                result.sort(
                     key=lambda x: float(x.get(column, 0) or 0),
                     reverse=reverse
                 )
             except (ValueError, TypeError):
-                # Non-numeric, sort as string
-                rows.sort(
+                # Non-numeric: sort as string
+                result.sort(
                     key=lambda x: str(x.get(column, "")),
                     reverse=reverse
                 )
         
-        return rows
+        return result
     
     def apply_limit(self, rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Apply LIMIT restriction."""
+        """Apply LIMIT."""
         limit = self.filters.get("LIMIT")
         if limit is None:
             return rows
@@ -423,7 +447,7 @@ class FilterDSL:
         return rows[:limit]
     
     def execute(self, rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Execute complete DSL (order: WHERE → GROUP BY → ORDER BY → LIMIT → SELECT)."""
+        """Execute the full DSL pipeline (order: WHERE → GROUP BY → ORDER BY → LIMIT → SELECT)."""
         result = rows
         
         # 1. WHERE
@@ -445,26 +469,18 @@ class FilterDSL:
 
 
 def detect_end_marker(row: Dict[str, Any]) -> bool:
-    """Detect if it's an END marker row (characteristics: <END>, full row END, all non-empty fields are END)."""
-    row_values = [str(v).strip().upper() for v in row.values() if v is not None]
-    
-    # Check if has <END> or END
+    """Detect whether a row is an END marker row.
+    A row is an END marker if any field contains '<END>' or equals 'END'."""
     for val in row.values():
         if val is not None:
             val_str = str(val).strip()
             if "<END>" in val_str or val_str.upper() == "END":
                 return True
-    
-    # Check if all non-empty fields are "END"
-    non_empty = [v for v in row_values if v != ""]
-    if non_empty and all(v == "END" for v in non_empty):
-        return True
-    
     return False
 
 
 def parse_csv_file(file_path: str) -> Dict[str, Any]:
-    """Parse single CSV file, return data + metadata (including empty batch detection)."""
+    """Parse a single CSV file; returns data + metadata (including empty batch detection)."""
     rows = []
     end_marker_rows = 0
     
@@ -473,13 +489,13 @@ def parse_csv_file(file_path: str) -> Dict[str, Any]:
             reader = csv.DictReader(f)
             for row in reader:
                 row_dict = dict(row)
-                # Detect if it's an END marker
+                # Detect END marker rows
                 if detect_end_marker(row_dict):
                     end_marker_rows += 1
                 else:
                     rows.append(row_dict)
     except UnicodeDecodeError:
-        # Try other encodings
+        # Retry with alternative encoding
         try:
             with open(file_path, 'r', encoding='gbk') as f:
                 reader = csv.DictReader(f)
@@ -504,11 +520,11 @@ def parse_csv_file(file_path: str) -> Dict[str, Any]:
             "data": [],
             "metadata": {
                 "file_path": file_path,
-                "error": f"Parsing failed: {str(e)}"
+                "error": f"Parse failed: {str(e)}"
             }
         }
     
-    # Calculate metadata
+    # Compute metadata
     total_rows = len(rows) + end_marker_rows
     is_empty_batch = (len(rows) == 0)
     
@@ -522,16 +538,19 @@ def parse_csv_file(file_path: str) -> Dict[str, Any]:
         "business_meaning": None
     }
     
-    # Determine reason and business meaning for empty batch
+    # Determine the reason and business meaning for an empty batch
     if is_empty_batch:
         if total_rows == 0:
             metadata["reason"] = "CSV file is completely empty (no header, no data)"
         elif total_rows == end_marker_rows:
-            metadata["reason"] = "CSV contains only END marker, no data rows"
+            metadata["reason"] = "CSV contains only END markers; no data rows"
         else:
-            metadata["reason"] = "CSV contains only header, no data rows"
+            metadata["reason"] = "CSV contains only a header row; no data rows"
         
-        metadata["business_meaning"] = "Empty batch: Merchant's pending settlement balance at Antom has not reached the agreed settlement threshold, so there is no actual settlement content today"
+        metadata["business_meaning"] = (
+            "Empty batch: the merchant's pending settlement balance has not yet reached "
+            "the agreed settlement threshold, so there is no actual settlement content today."
+        )
     
     return {
         "success": True,
@@ -541,17 +560,19 @@ def parse_csv_file(file_path: str) -> Dict[str, Any]:
 
 
 def parse_xlsx_file(file_path: str) -> Dict[str, Any]:
-    """Parse single XLSX file, return data + metadata (including empty batch detection)."""
+    """Parse a single XLSX file; returns data + metadata (including empty batch detection)."""
     from openpyxl import load_workbook
     
     rows = []
+    end_marker_rows = 0
     
     try:
-        # Fix: cannot use read_only=True, otherwise header reading may be incomplete for some files
+        # Fix: read_only=True cannot be used as it may produce incomplete headers
+        # for some files
         wb = load_workbook(filename=file_path, read_only=False)
         ws = wb.active
         
-        # Get header
+        # Read header row
         headers = []
         for cell in next(ws.iter_rows(min_row=1, max_row=1)):
             headers.append(str(cell.value) if cell.value is not None else "")
@@ -562,17 +583,23 @@ def parse_xlsx_file(file_path: str) -> Dict[str, Any]:
             for col_idx, cell in enumerate(row):
                 if col_idx < len(headers):
                     value = cell.value
-                    # Convert types to strings (consistent with CSV)
+                    # Normalize to string (consistent with CSV).
+                    # For numeric values, route through Decimal to avoid
+                    # float→str precision loss (e.g. str(float(19.99)) → "19.990000000000002").
                     if value is None:
                         value = ""
-                    elif isinstance(value, (int, float)):
+                    elif isinstance(value, float):
+                        value = str(Decimal(str(value)))
+                    elif isinstance(value, int):
                         value = str(value)
                     else:
                         value = str(value)
                     row_dict[headers[col_idx]] = value
             
             # Detect END marker
-            if not detect_end_marker(row_dict):
+            if detect_end_marker(row_dict):
+                end_marker_rows += 1
+            else:
                 rows.append(row_dict)
         
         wb.close()
@@ -583,21 +610,25 @@ def parse_xlsx_file(file_path: str) -> Dict[str, Any]:
             "data": [],
             "metadata": {
                 "file_path": file_path,
-                "error": f"XLSX parsing failed: {str(e)}"
+                "error": f"XLSX parse failed: {str(e)}"
             }
         }
     
-    # Calculate metadata
+    # Compute metadata
+    total_rows = len(rows) + end_marker_rows
     is_empty_batch = (len(rows) == 0)
     
     metadata = {
         "file_path": file_path,
-        "total_rows": len(rows),
+        "total_rows": total_rows,
         "data_rows": len(rows),
-        "end_marker_rows": 0,
+        "end_marker_rows": end_marker_rows,
         "is_empty_batch": is_empty_batch,
         "reason": "No data rows in XLSX file" if is_empty_batch else None,
-        "business_meaning": "Empty batch: Merchant's pending settlement balance at Antom has not reached the agreed settlement threshold, so there is no actual settlement content" if is_empty_batch else None
+        "business_meaning": (
+            "Empty batch: the merchant's pending settlement balance has not yet reached "
+            "the agreed settlement threshold, so there is no actual settlement content today."
+        ) if is_empty_batch else None
     }
     
     return {
@@ -611,24 +642,25 @@ def parse_reports(
     input: Union[List[str], str],
     filters: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
-    """Main reconciliation report parsing function: parse CSV/XLSX, apply DSL filtering, return data + fee_summary + metadata."""
-    # Process input parameter
+    """Main report parsing function: parse CSV/XLSX files, apply DSL filters,
+    return data + fee_summary + metadata."""
+    # Normalize input
     if isinstance(input, str):
         input = [input]
     
     if not isinstance(input, list):
         raise ValueError("input must be a list of strings or a single string")
 
-    # ── Report type gate (filename + lightweight content sanity) ──
-    # Must run BEFORE any parsing. Fails the whole call on the first invalid
-    # file — Agent then surfaces ReportTypeError.reason to the merchant.
+    # ── Report type gate (filename + lightweight header check) ──
+    # Must run before any parsing. If any file fails, the entire batch fails —
+    # the agent surfaces ReportTypeError.reason to the merchant.
     for file_path in input:
         detect_report_type(file_path)
 
-    # Parse all CSV files
+    # Parse all files
     all_rows = []
     parsed_files = []  # Successfully parsed file paths
-    parse_errors = []  # Files with parsing errors
+    parse_errors = []  # Files that failed to parse
     
     file_metadata = {
         "file_count": len(input),
@@ -652,15 +684,15 @@ def parse_reports(
             result = parse_csv_file(file_path)
         
         if not result.get("success"):
-            # ❌ Parsing failed: record but continue parsing other files
+            # Parse failure: record and continue with remaining files
             parse_errors.append({
                 "file_path": file_path,
-                "error": result.get("metadata", {}).get("error", "Unknown parsing error")
+                "error": result.get("metadata", {}).get("error", "Unknown parse error")
             })
             file_metadata["failed_files"] += 1
             continue
         
-        # ✅ Success: accumulate data rows
+        # Success: accumulate data rows
         parsed_files.append(file_path)
         all_rows.extend(result.get("data", []))
         
@@ -674,14 +706,14 @@ def parse_reports(
         if meta.get("is_empty_batch"):
             file_metadata["empty_batch_files"].append(file_path)
     
-    # Update successful file count
+    # Update success file count
     file_metadata["success_files"] = len(parsed_files)
     file_metadata["parse_errors"] = parse_errors
     
-    # Determine if all are empty batches (only consider successfully parsed files)
+    # Determine whether all successfully parsed files are empty batches
     is_all_empty = (len(all_rows) == 0) and (len(file_metadata["empty_batch_files"]) == file_metadata["success_files"])
     
-    # Validate filters before executing DSL
+    # Validate DSL filters before execution
     if filters:
         error_msg = validate_dsl(filters)
         if error_msg:
@@ -695,16 +727,16 @@ def parse_reports(
                 }
             }
     
-    # Apply DSL filtering (only for non-empty batches)
+    # Apply DSL filtering (only when data rows exist)
     if filters and all_rows:
         dsl = FilterDSL(filters)
         all_rows = dsl.execute(all_rows)
     
-    # Build return result
+    # Build return payload
     partial_success = len(parse_errors) > 0 and len(parsed_files) > 0
     has_success = len(parsed_files) > 0
     
-    # Auto-calculate fee summary (full coverage of 17 fee fields)
+    # Auto-compute fee summary (full coverage of all 20 fee fields)
     fee_summary = get_fee_summary(all_rows) if all_rows else None
     
     result = {
@@ -715,11 +747,35 @@ def parse_reports(
         "metadata": file_metadata
     }
     
-    # If empty batch, add business meaning
+    # Annotate empty batch with business meaning
     if is_all_empty and has_success:
         result["metadata"]["is_empty_batch"] = True
-        result["metadata"]["business_meaning"] = "Empty batch: Merchant's pending settlement balance at Antom has not reached the agreed settlement threshold, so there is no actual settlement content. This is not an error, but a normal business state."
+        result["metadata"]["business_meaning"] = (
+            "Empty batch: the merchant's pending settlement balance has not yet reached "
+            "the agreed settlement threshold, so there is no actual settlement content. "
+            "This is not an error — it is a normal business state."
+        )
     
     return result
 
 
+# ---------------------------------------------------------------------------
+# CLI entry point
+# ---------------------------------------------------------------------------
+if __name__ == "__main__":
+    import argparse
+    import sys
+
+    _cli = argparse.ArgumentParser(
+        description="Parse settlement detail CSV/XLSX reports",
+    )
+    _cli.add_argument("--files", nargs="+", required=True,
+                      help="CSV/XLSX file paths to parse")
+    _cli.add_argument("--filters", default=None,
+                      help="DSL filter JSON string (optional)")
+    _args = _cli.parse_args()
+
+    _filters = json.loads(_args.filters) if _args.filters else None
+    _result = parse_reports(_args.files, _filters)
+    print(json.dumps(_result, indent=2, ensure_ascii=False, default=str))
+    sys.exit(0 if _result.get("success") else 1)

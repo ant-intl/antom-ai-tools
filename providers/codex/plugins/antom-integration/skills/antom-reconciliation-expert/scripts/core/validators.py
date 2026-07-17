@@ -11,16 +11,17 @@ from typing import Dict, Any, Optional, List, Tuple
 from .constants import ALL_FEE_FIELDS
 
 
-# Special fee line types: fees reflected in settlementAmountValue rather than 17 fee fields
-_SPECIAL_FEE_TYPES = {"SETTLEMENT_FEE", "ADJUSTMENT_FEE"}
+# Special fee line types: fee is reflected in settlementAmountValue rather than
+# in the 20 individual fee fields
+_SPECIAL_FEE_TYPES = frozenset({"SETTLEMENT_FEE", "ADJUSTMENT_FEE"})
 
 
 # ============================================================
-# Basic utility functions
+# Utility functions
 # ============================================================
 
 def safe_decimal(val: Any) -> Decimal:
-    """Safely convert to Decimal, empty values/invalid strings return 0."""
+    """Safely convert to Decimal; returns 0 for empty values or invalid strings."""
     if val is None:
         return Decimal('0')
     s = str(val).strip()
@@ -33,7 +34,7 @@ def safe_decimal(val: Any) -> Decimal:
 
 
 def parse_currency_pair(pair_str: str) -> Tuple[Optional[str], Optional[str]]:
-    """Parse quoteCurrencyPair string (e.g., "USD/SGD"), return (left, right)."""
+    """Parse a quoteCurrencyPair string (e.g. "USD/SGD"); returns (left, right)."""
     if not pair_str or '/' not in pair_str:
         return (None, None)
     parts = pair_str.strip().split('/')
@@ -51,7 +52,8 @@ def parse_currency_pair(pair_str: str) -> Tuple[Optional[str], Optional[str]]:
 # ============================================================
 
 def compute_gross_settle_amount(row: Dict[str, Any]) -> Dict[str, Any]:
-    """Calculate grossSettleAmount (total transaction amount in settlement currency, excluding fees), with cross-validation."""
+    """Compute grossSettleAmount (transaction amount in settlement currency,
+    excluding fees), with cross-validation."""
     txn_amount = safe_decimal(row.get('transactionAmountValue'))
     txn_currency = str(row.get('transactionCurrency', '')).strip()
     settle_currency = str(row.get('settlementCurrency', '')).strip()
@@ -77,7 +79,7 @@ def compute_gross_settle_amount(row: Dict[str, Any]) -> Dict[str, Any]:
         result["success"] = True
         return result
 
-    # Cross-currency: need quotePrice
+    # Cross-currency: quotePrice is required
     if quote_price == 0:
         result["error"] = "quotePrice is 0 or missing"
         return result
@@ -88,11 +90,11 @@ def compute_gross_settle_amount(row: Dict[str, Any]) -> Dict[str, Any]:
         return result
 
     if txn_currency == left:
-        # txn in left currency, settle in right currency → multiply
+        # Transaction in left currency, settlement in right currency → multiply
         gross = (txn_amount * quote_price).quantize(Decimal('0.01'), rounding=ROUND_HALF_EVEN)
         result["method"] = "multiply"
     elif txn_currency == right:
-        # txn in right currency, settle in left currency → divide
+        # Transaction in right currency, settlement in left currency → divide
         gross = (txn_amount / quote_price).quantize(Decimal('0.01'), rounding=ROUND_HALF_EVEN)
         result["method"] = "divide"
     else:
@@ -105,7 +107,7 @@ def compute_gross_settle_amount(row: Dict[str, Any]) -> Dict[str, Any]:
     result["gross"] = gross
     result["success"] = True
 
-    # Cross-validation: convertedTransactionAmountValue
+    # Cross-validation against convertedTransactionAmountValue
     converted_raw = row.get('convertedTransactionAmountValue')
     if converted_raw is not None:
         converted = safe_decimal(converted_raw)
@@ -121,22 +123,23 @@ def compute_gross_settle_amount(row: Dict[str, Any]) -> Dict[str, Any]:
 
 
 # ============================================================
-# Single-row settlement amount validation
+# Single-row balance check
 # ============================================================
 
 def validate_row_formula(
     row: Dict[str, Any],
     tolerance: Decimal = Decimal('0.02'),
 ) -> Dict[str, Any]:
-    """Validate single-row settlement amount: settlement = gross + sum(fees). Auto-identifies non_formula_row."""
+    """Validate single-row balance formula: settlement = gross + sum(fees).
+    Automatically identifies non_formula_row."""
     settle_amount = safe_decimal(row.get('settlementAmountValue'))
     txn_type = str(row.get('transactionType', '')).strip()
 
-    # Calculate gross
+    # Compute gross
     gross_result = compute_gross_settle_amount(row)
     gross = gross_result["gross"] if gross_result["success"] else Decimal('0')
 
-    # Calculate total fees
+    # Sum all fee fields
     total_fees = Decimal('0')
     for field in ALL_FEE_FIELDS:
         total_fees += safe_decimal(row.get(field))
@@ -159,7 +162,7 @@ def validate_row_formula(
         result["row_type"] = "non_formula_row"
         return result
 
-    # gross calculation failed but doesn't match non_formula_row characteristics
+    # gross computation failed but does not match non_formula_row characteristics
     if not gross_result["success"]:
         result["row_type"] = "formula_row"
         result["valid"] = False
@@ -179,11 +182,12 @@ def validate_row_formula(
 
 
 # ============================================================
-# Batch/cross-batch settlement amount validation
+# Batch / cross-batch balance check
 # ============================================================
 
 def validate_batch_formula(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Batch-level settlement amount validation. Validates each row then aggregates net_settlement, returns failures and statistics."""
+    """Batch-level balance formula validation. Validates each row and aggregates
+    net_settlement; returns failures and statistics."""
     net_settlement = Decimal('0')
     formula_rows = 0
     non_formula_rows = 0
@@ -239,11 +243,11 @@ def validate_batch_formula(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 # ============================================================
-# Fee model identification
+# Fee model detection
 # ============================================================
 
 def detect_fee_model(row: Dict[str, Any]) -> str:
-    """Identify single-row fee model: IC++ vs BLENDED_RATE vs UNKNOWN."""
+    """Identify the fee model for a single row: IC++ vs BLENDED_RATE vs UNKNOWN."""
     has_interchange = safe_decimal(row.get('interchangeFeeAmountValue')) != 0
     has_scheme = safe_decimal(row.get('schemeFeeAmountValue')) != 0
     has_markup = safe_decimal(row.get('acquirerMarkupAmountValue')) != 0
@@ -262,7 +266,8 @@ def detect_fee_model(row: Dict[str, Any]) -> str:
 # ============================================================
 
 def compute_settlement_summary(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Build financial breakdown view: decompose rows into gross revenue + fees + special fee rows + OTHERS, with formula_check self-validation."""
+    """Build financial breakdown view: decompose rows into gross revenue + fees +
+    special fee rows + OTHERS, with balance_check self-validation."""
     Q = Decimal('0.01')
 
     net_settlement = Decimal('0')
@@ -279,7 +284,7 @@ def compute_settlement_summary(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     special_total = Decimal('0')
     special_by_type: Dict[str, Dict] = {}
 
-    # OTHERS
+    # Others
     others_total = Decimal('0')
     others_by_type: Dict[str, Dict] = {}
 
@@ -288,11 +293,11 @@ def compute_settlement_summary(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         txn_type = str(row.get('transactionType', '')).strip()
         net_settlement += settle
 
-        # Calculate grossSettleAmount
+        # Compute grossSettleAmount
         gross_result = compute_gross_settle_amount(row)
         gross = gross_result["gross"] if gross_result["success"] else Decimal('0')
 
-        # Calculate inline fees
+        # Compute inline fees for this row
         inline_fees = Decimal('0')
         for field in ALL_FEE_FIELDS:
             val = safe_decimal(row.get(field))
@@ -300,7 +305,7 @@ def compute_settlement_summary(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
             if val != 0:
                 fees_by_field[field] = fees_by_field.get(field, Decimal('0')) + val
 
-        # Classification
+        # Classify row
         if gross != 0 or inline_fees != 0:
             # Normal transaction row: contributes gross revenue and fees
             gross_total += gross
@@ -320,14 +325,14 @@ def compute_settlement_summary(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
                 special_by_type[txn_type]["count"] += 1
                 special_by_type[txn_type]["amount"] += settle
             else:
-                # OTHERS
+                # Others
                 others_total += settle
                 if txn_type not in others_by_type:
                     others_by_type[txn_type] = {"count": 0, "amount": Decimal('0')}
                 others_by_type[txn_type]["count"] += 1
                 others_by_type[txn_type]["amount"] += settle
         else:
-            # All-zero row (gross=0, fees=0, settle=0): count in gross statistics but amount is 0
+            # All-zero row (gross=0, fees=0, settle=0): include in gross stats with zero amount
             if txn_type not in gross_by_type:
                 gross_by_type[txn_type] = {"count": 0, "amount": Decimal('0')}
             gross_by_type[txn_type]["count"] += 1
@@ -360,9 +365,51 @@ def compute_settlement_summary(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
             "total": others_total.quantize(Q, rounding=ROUND_HALF_EVEN),
             "by_type": _quantize_by_type(others_by_type),
         },
-        "formula_check": {
+        "balance_check": {
             "reconstructed": reconstructed.quantize(Q, rounding=ROUND_HALF_EVEN),
             "diff": diff.quantize(Q, rounding=ROUND_HALF_EVEN),
-            "balanced": abs(diff) < Decimal('1.00'),
+            "balanced": abs(diff) <= max(Decimal('0.01') * len(rows), Decimal('0.10')),
+            "threshold": str(max(Decimal('0.01') * len(rows), Decimal('0.10'))),
         },
     }
+
+
+# ---------------------------------------------------------------------------
+# CLI entry point
+# ---------------------------------------------------------------------------
+if __name__ == "__main__":
+    import argparse
+    import json as _json
+    import sys
+
+    _cli = argparse.ArgumentParser(
+        description="Validate settlement reports and compute financial summaries",
+    )
+    _cli.add_argument("--mode", required=True,
+                      choices=["summary", "batch", "fee-model"],
+                      help="Validation mode: summary | batch | fee-model")
+    _cli.add_argument("--input", required=True,
+                      help="JSON file from parser output (contains 'data' field)")
+    _args = _cli.parse_args()
+
+    with open(_args.input) as _f:
+        _parsed = _json.load(_f)
+    _rows = _parsed.get("data", [])
+
+    if _args.mode == "summary":
+        _result = compute_settlement_summary(_rows)
+    elif _args.mode == "batch":
+        _result = validate_batch_formula(_rows)
+    elif _args.mode == "fee-model":
+        _result = [
+            {
+                "transaction_type": _r.get("transactionType", ""),
+                "fee_model": detect_fee_model(_r),
+            }
+            for _r in _rows
+        ]
+    else:
+        print(f"Unknown mode: {_args.mode}", file=sys.stderr)
+        sys.exit(1)
+
+    print(_json.dumps(_result, indent=2, ensure_ascii=False, default=str))

@@ -1,27 +1,28 @@
-"""  
+"""
 Antom Reconciliation Report Constant Definitions
 
-All enumerable structured rules are centrally managed here to reduce the agent's freedom to "recall" rules from natural language.
+All enumerable structured rules are centrally managed here to reduce the
+degree of freedom an agent has when recalling rules from natural language.
 """
+
+import re as _re
 
 
 # ============================================================
-# Settlement Detail filename pattern
-# Purpose: Layer-1 detection — accepts only Settlement Detail report filenames.
-# Directory path is NEVER part of the detection.
+# Settlement Detail filename regex
+# Purpose: Layer-1 detection — only accept Settlement Detail report filenames.
+#          Directory path is NEVER part of the detection.
 #
-# Rule: filename (basename, case-insensitive) MUST contain BOTH keywords
-# "SETTLEMENT" and "DETAIL" in any order/position, and end with .csv/.xlsx.
-# Examples accepted:
+# Rule: basename (case-insensitive) must contain both "SETTLEMENT" and "DETAIL"
+# as keywords (in any order / position), and end with .csv or .xlsx.
+# Accepted examples:
 #   - SETTLEMENT_DETAIL_202604271985548486_20260428.xlsx
 #   - Settlement_Detail_Report.csv
 #   - A_SettlementDetailReport_xxx.xlsx
-# Examples rejected:
+# Rejected examples:
 #   - SETTLEMENT_SUMMARY_xxx.xlsx   (missing DETAIL)
 #   - TRANSACTION_DETAIL_xxx.xlsx   (missing SETTLEMENT)
 # ============================================================
-import re as _re
-
 SETTLEMENT_DETAIL_FILENAME_RE = _re.compile(
     r"^(?=.*SETTLEMENT)(?=.*DETAIL).+\.(csv|xlsx)$",
     _re.IGNORECASE,
@@ -29,23 +30,24 @@ SETTLEMENT_DETAIL_FILENAME_RE = _re.compile(
 
 
 # ============================================================
-# Settlement Detail content sanity check (positive + negative signals)
+# Settlement Detail header content sanity check (positive + negative signals)
 # Purpose: After the filename gate passes, verify the header structure is
-# actually a Settlement Detail report — not a Transaction Detail or
-# Settlement Summary file that was renamed to SETTLEMENT_DETAIL_*.csv/xlsx.
+#          actually a Settlement Detail report — not a Transaction Detail or
+#          Settlement Summary file that was renamed to SETTLEMENT_DETAIL_*.
+#          Catches obvious renaming/spoofing.
 #
 # Two-layer rule:
-#   1. POSITIVE: header must contain at least SETTLEMENT_DETAIL_MIN_CORE_MATCH
-#      columns from SETTLEMENT_DETAIL_CORE_COLUMNS. These columns exist in
-#      Settlement Detail but are absent from Settlement Summary, so a renamed
-#      summary file will fail this check.
-#   2. NEGATIVE: header must NOT contain any column from
-#      SETTLEMENT_DETAIL_FORBIDDEN_COLUMNS. These columns are unique to
-#      Transaction Detail reports, so a renamed transaction file will fail.
+#   1. Positive (POSITIVE): the header must match at least
+#      SETTLEMENT_DETAIL_MIN_CORE_MATCH columns from SETTLEMENT_DETAIL_CORE_COLUMNS.
+#      These columns exist in Settlement Detail but not in Settlement Summary,
+#      so a renamed Summary file will be rejected here.
+#   2. Negative (NEGATIVE): the header must not contain any column from
+#      SETTLEMENT_DETAIL_FORBIDDEN_COLUMNS. These columns are exclusive to
+#      Transaction Detail reports, so a renamed TX Detail file will be rejected here.
 #
-# Threshold rationale: 6 of 10 is lenient enough to tolerate Antom schema
-# evolution (occasional column rename/removal) while still rejecting a
-# Settlement Summary file (which only shares ~3 of the 10 core columns).
+# Threshold rationale: 6 / 10 tolerates Antom schema evolution (minor column
+# renames / removals) while reliably rejecting Settlement Summary
+# (which shares only ~3 core columns).
 # ============================================================
 SETTLEMENT_DETAIL_CORE_COLUMNS = {
     "settlementBatchId",
@@ -76,14 +78,15 @@ SETTLEMENT_DETAIL_FORBIDDEN_COLUMNS = {
 
 
 # ============================================================
-# Fee field constants (all 17 fee amount fields)
-# Source: CDN rules/bill-schema.md Section 9 / amount-fields.md Section 3
-# Purpose: Ensure full coverage during fee aggregation, prohibit field selection based on samples
+# Fee field constants (all 20 fee amount fields)
+# Source: bill-schema.md Section 9 / amount-fields.md Section 3
+# Purpose: Ensure full coverage during fee aggregation; inferring field
+#          selection from sample data is prohibited
 # ============================================================
 ALL_FEE_FIELDS = [
     "paymentMethodFeeAmountValue",       # Payment method fee (Blended Rate)
-    "interchangeFeeAmountValue",         # IC fee (Issuing bank)
-    "schemeFeeAmountValue",              # SF fee (Card scheme)
+    "interchangeFeeAmountValue",         # IC fee (issuing bank)
+    "schemeFeeAmountValue",              # SF fee (card scheme)
     "acquirerMarkupAmountValue",         # Markup fee (PSP markup)
     "processingFeeAmountValue",          # Fixed processing fee
     "taxFeeAmountValue",                 # Tax
@@ -98,13 +101,17 @@ ALL_FEE_FIELDS = [
     "iofFeeAmountValue",                 # Brazil IOF tax
     "withholdingTaxAmountValue",         # Withholding tax
     "fxFeeAmountValue",                  # FX exchange fee
+    "rtauServiceFeeAmountValue",         # AU (Account Updater) service fee
+    "ntServiceFeeAmountValue",           # Network Token service fee
+    "revenueBoosterServiceFeeAmountValue",  # Card Revenue Booster service fee
 ]
 
 
 # ============================================================
 # Fee field pairing: amount field → corresponding currency field
-# Source: CDN rules/bill-schema.md Section 10
-# Purpose: Validate fee currency consistency (all fee currencies usually = settlementCurrency)
+# Source: bill-schema.md Section 10
+# Purpose: Validate fee currency consistency (all fee currencies
+#          are typically equal to settlementCurrency)
 # ============================================================
 FEE_FIELD_PAIRS = {
     "paymentMethodFeeAmountValue":       "paymentMethodFeeCurrency",
@@ -124,23 +131,29 @@ FEE_FIELD_PAIRS = {
     "iofFeeAmountValue":                 "iofFeeCurrency",
     "withholdingTaxAmountValue":         "withholdingTaxFeeCurrency",
     "fxFeeAmountValue":                  "fxFeeAmountCurrency",
+    "rtauServiceFeeAmountValue":         "rtauServiceFeeCurrency",
+    "ntServiceFeeAmountValue":           "ntServiceFeeCurrency",
+    "revenueBoosterServiceFeeAmountValue": "revenueBoosterServiceFeeCurrency",
 }
 
 
 # ============================================================
 # Transaction type enumeration (17 types)
 # Source: transaction-types.md / id-fields.md
-# Purpose: Structured rule lookup table, replacing agent inference from natural language
+# Purpose: Structured rule lookup table, replacing agent inference from
+#          natural language
 #
 # Attribute descriptions:
-#   has_original_txn_request_id: Whether has originalTransactionRequestId
-#   has_txn_request_id: Whether has transactionRequestId
+#   has_original_txn_request_id: whether originalTransactionRequestId is present
+#   has_txn_request_id: whether transactionRequestId is present
 #   description: English description
 #
 # Design decisions:
-#   - Does not contain fee_sign: Whatever is written on the report is what it is, not determined by transaction type
-#   - Does not contain category: No practical use
-#   - Does not contain needs_formula_validation: Automatically determined by data, not hardcoded
+#   - fee_sign excluded: whatever is written on the report is what it is,
+#     not determined by transaction type
+#   - category excluded: no practical use
+#   - needs_formula_validation excluded: determined automatically from data,
+#     not hardcoded
 # ============================================================
 TRANSACTION_TYPES = {
     "PAYMENT": {
@@ -229,3 +242,9 @@ TRANSACTION_TYPES = {
         "description": "CDRN cardholder dispute network",
     },
 }
+
+
+# ============================================================
+# Download configuration
+# ============================================================
+DOWNLOAD_REFERER = "https://dashboard.antom.com"
