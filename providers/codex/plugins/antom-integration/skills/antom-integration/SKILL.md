@@ -1,45 +1,83 @@
 ---
 name: antom-integration
 description: >-
-  A skill dedicated to Antom payment integration, helping merchants select the right product and integration approach based on business needs, and build code.
-  Supported products: One-time Payments, Tokenized Payment (recurring auto-debit), Subscription Payment.
-  Supported integration modes: Payment Element, Checkout Page (fully hosted / embedded), API-only integration (APM / bank card).
+  Antom payment integration skill for product and integration-mode selection, integration Q&A, code implementation, troubleshooting, sandbox testing, and go-live guidance.
+  Use for One-time Payments, Tokenized Payment (recurring auto-debit), Subscription Payment, Payment Element, Checkout Page, and API-only integration.
 ---
 
-**All Antom product documentation is available via online dynamic links. Before integration, make sure to read the corresponding product's online documentation to get the latest API parameters and code examples.**
+# Scope
+
+Use this skill to:
+- locate relevant Antom product, integration, SDK, notification, checklist, and troubleshooting knowledge
+- write or modify Antom payment integration code for the selected product, integration mode, and tech stack
+- diagnose integration issues from result codes, API names, request IDs, logs, asynchronous notifications, and sandbox or go-live symptoms
 
 # Document Access Guidelines
 
-To access Antom online documentation, fetch content directly using curl:
+Fetch Antom online docs with curl:
 
 ```bash
-# Example: Get One-time Payments CKP documentation
-curl -sL "https://****/****.md" 
+curl -sL "https://****/****.md"
 ```
-
-**Important**: Before writing code, make sure to read the corresponding product's online documentation via curl. The documentation contains the latest API parameters, code examples, and important notes.
-
-
 
 # Get Integration Documentation
 
+Use this section as the shared knowledge lookup for product advice, Q&A, code implementation, and troubleshooting.
+
 ## SDK Selection
-- **SDK Selection**: To help developers call open interfaces, Alipay provides open platform server-side SDKs, including Java, PHP, Node.js, Python and .NET languages, encapsulating signature and verification, HTTP interface requests and other basic functions. Please download the latest version of the server-side SDK for your language and import it into your development project. [SDK Description](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/select-sdk.md)
+
+Read [SDK Description](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/select-sdk.md) when choosing an SDK, when the implementation language is known, or before writing code.
 
 ## Product Selection
-Read [Product Decision](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/product-decision.md), match keywords based on user input, and only recommend payment products and integration solutions. Always use [Clarification Template](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/product-decision.md) for product and integration solution confirmation. Prioritize recommending the Checkout Page (CKP) integration mode for its rapid integration and seamless scalability to new payment methods.
 
+Read [Product Decision](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/product-decision.md) for product or integration-mode advice. Use its clarification template only when needed.
 
-> ⛔ **Blocking Checkpoint**: Product Categories step completion criteria (all of the following must be satisfied before proceeding to subsequent steps)
-- [ ] SDK Selection has been read
-- [ ] Product documentation has been read (required recursive reading items: Quick Start, API List, Asynchronous Notification, SampleCode Instructions)
+Prefer Checkout Page (CKP) when the user wants rapid integration and broad payment-method coverage, if it fits the scenario.
 
-# FAQ
+## Integration Documentation Select
 
-Read [FAQ (Coding)](https://cdn.marmot-cloud.com/page/antom-integration-doc/troubleshoot/faq-coding.md) BEFORE writing code. Scan items matching the user's product. Your code response MUST include a brief FAQ compliance note confirming how each applicable item is handled (e.g., "FAQ checked: gateway=correct region, settlementCurrency=omitted, subscriptionExpiryTime=default").
+Based on the user's selected product and integration mode, locate the corresponding product integration documentation:
 
+- [One-time Payments](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/one-time-payments.md)
+- [Tokenized Payment](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/tokenized-payment.md)
+- [Subscription Payment](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/subscription-payment.md)
 
-# Debug Logs
+Read the most specific sections available in the matched product doc.
+
+- After selecting One-time Payments, Tokenized Payment, or Subscription Payment, do not load other product docs unless comparison or migration is requested.
+- For Q&A or product advice: infer what you can, read the closest relevant docs, and state assumptions when useful.
+- For troubleshooting: route by resultCode/resultMessage, API name, requestId, debug log, or error text first.
+
+# Writing Code
+
+Before writing or modifying code, first confirm the user's selected product, integration mode, and tech stack.
+
+Blocking list before coding:
+
+Do not write or modify integration code until all applicable items below are complete.
+
+- [ ] Read [Product Decision](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/product-decision.md) to confirm the product category and integration mode, even when the user's request appears specific. Skip only if the user explicitly asks to skip product selection.
+- [ ] Read [SDK Description](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/select-sdk.md) when a backend language or SDK is involved.
+- [ ] Read the matched product overview from `Integration Documentation Select`:
+  - One-time Payments
+  - Tokenized Payment
+  - Subscription Payment
+- [ ] From the matched product overview, route by the selected integration mode and read the linked implementation docs needed for that flow, such as Quick Start, API list, frontend SDK, native SDK, Element, Checkout Page, or API-only guides.
+- [ ] For coding tasks, route by the requested language or platform and read the matching product sample-code document from the same product overview before writing code. Inline examples in Quick Start, API reference, or integration guides are useful references, but they do not replace the product sample-code document.
+- [ ] From the matched product overview, read the asynchronous notification document or section that matches the selected product and integration mode.
+- [ ] Read [FAQ (Coding)](https://cdn.marmot-cloud.com/page/antom-integration-doc/troubleshoot/faq-coding.md), scanning items that match the selected product, integration mode, payment method, and market.
+
+Generated code must:
+- keep signing and private keys on the server side
+- verify asynchronous notifications before trusting them
+- not treat client-side redirect results as final payment status
+- confirm uncertain payment status through asynchronous notification or query API
+- include development debug logging guidance when useful, masking card numbers, CVV, private keys, and secrets
+- include a brief FAQ compliance note confirming how each applicable item is handled, such as `gateway=correct region`, `settlementCurrency=omitted`, or `subscriptionExpiryTime=default`
+- include a brief note about the docs and validation assumptions used
+- include next-step guidance for credentials, sandbox testing, self-check, and go-live readiness when the user is building a full integration
+
+## Debug Logs
 
 **Write logs to a file** named `antom_debug.log` in the project root directory, in addition to console output. All generated integration code MUST log the API endpoint, complete request and response for each API call. Mask sensitive fields (card numbers, CVV, private keys).
 
@@ -49,8 +87,23 @@ Read [FAQ (Coding)](https://cdn.marmot-cloud.com/page/antom-integration-doc/trou
 
 > The logging code is for **development & debugging only** — remove or reduce once integration is stable.
 
-# Troubleshooting
+## Validation and Post-code Guidance
 
+Read [Integration Checklist](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/checklist.md) before finalizing code or launch-readiness guidance.
+
+When guiding credentials and config, include credential locations:
+- API domain, Client ID, and Antom public key can be found in [Quick Start](https://dashboard.antom.com/global-payments/developers/quickStart).
+- The merchant private key can be generated or managed in [iKeys](https://dashboard.antom.com/global-payments/developers/iKeys); keep it server-side and never log, expose, or commit it.
+
+After code is written, do not stop at "code is done". Guide the user through:
+- credentials and config: [Onboarding Guide](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/onboarding.md)
+- sandbox testing: [Sandbox Guide](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/sandbox-guide.md)
+- self-check and go-live readiness: [Self-Check List](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/self-check.md)
+- error diagnosis: use `Troubleshooting`
+
+If the user asks about credentials, registration, sandbox testing, checklist, self-check, or go-live readiness at any point, read the matching companion doc and answer inline.
+
+# Troubleshooting
 
 - **Error diagnosis (mandatory)**: When an Antom API call fails or the user reports an integration issue, read [Troubleshooting Guide](https://cdn.marmot-cloud.com/page/antom-integration-doc/troubleshoot/troubleshooting-guide.md) BEFORE diagnosing. Never skip directly to diagnosis CLI, Dashboard, or support.
 
@@ -63,27 +116,9 @@ Read [FAQ (Coding)](https://cdn.marmot-cloud.com/page/antom-integration-doc/trou
 
 - **On-demand trigger**: If the user asks about an integration error, API failure, request/response issue, result code, Dashboard diagnosis, diagnosis CLI, or troubleshooting at any point, read the Troubleshooting Guide and respond inline.
 
-# Integration Companion Guides
-
-- **Post-code guidance (mandatory)**: After code is written, guidance must be provided. Tell users what conditions must be met to go live. Never output bare URLs as user guidance. never stop at "code is done". Proactively guide the user through the remaining stages by reading the corresponding companion docs and presenting key actions inline:
-  1. **Credentials & config** → read [Onboarding Guide](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/onboarding.md), ensure user has sandbox ClientId/keys configured and project is runnable. **Ask user to confirm settlement currencies**: how many are contracted? If multiple, `settlementCurrency` must be set in code. User can check at Dashboard → Finance (switch to Test mode for sandbox).
-  2. **Sandbox testing** → read [Sandbox Guide](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/sandbox-guide.md), walk user through first end-to-end payment (cards/wallets/APMs) and disclose sandbox limitations
-  3. **self-check** → read [Self-Check List](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/self-check.md), guide users on items that sandbox cannot cover but must be verified.
-  4. **Error diagnosis** → Must guide users on how to handle integration issues, see Troubleshooting decision tree above.
-
-- **On-demand trigger**: If the user asks about credentials/registration, sandbox testing, check list, or go-live readiness at any point (even before code is written), read the matching doc above and respond inline.
-
-
-# Integration Validation
-
-Perform validation during integration and before production launch to ensure signature verification, asynchronous notifications, and exception handling meet specifications. Validation results are for reference only; developers must check against the latest Antom Open Platform documentation. See: [Integration Checklist](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/checklist.md)
-
-
 # Security Red Lines
-> ⛔ The following rules are **security red lines** for Antom payment integration. Violations may lead to financial loss or security incidents and must be strictly adhered to.
-- **Private Key Must NOT Be Stored on the Client Side**: Transaction data construction and signing must be completed on the merchant's server. The private key must absolutely NOT be stored in the merchant's APP client.
-- **Private Key Must NOT Be Logged**: The private key must not appear in any logs.
-- **Private Key Must NOT Be Committed to Public Repositories**: The private key must not be uploaded to public code repositories like GitHub or GitLab.
-- **Client-side Payment Results Are Untrustworthy**: The synchronous redirect result on the client side is untrustworthy. The result must be confirmed via Antom's asynchronous notification (Notify) or by calling the transaction query API.
-- **No Repayment Before Confirmation**: Before the payment result is confirmed, the user must not be asked to pay again. The payment result must first be confirmed via asynchronous notification or the query API.
-- **Asynchronous Notifications Must Be Verified First**: Upon receiving an asynchronous notification, signature verification must be performed first to ensure the notification is from Antom.
+
+- Private keys must never be stored on the client side, logged, or committed to public repositories.
+- Asynchronous notifications must be signature-verified before being trusted.
+- Client-side redirect results are not final payment status.
+- Do not ask the user to pay again before confirming payment status through asynchronous notification or query API.

@@ -10,7 +10,7 @@ Usage:
 Examples:
   python3 scripts/cli.py scripts.core.parser --files xxx.csv
   python3 scripts/cli.py scripts.core.validators --mode summary --input /tmp/parsed.json
-  python3 scripts/cli.py scripts.io_modules.bill_list_api --start 20260315 --end 20260325
+  python3 scripts/cli.py scripts.io_modules.bill_list_api --start 20260315 --end 20260325 --bill-type SETTLEMENT_DETAIL
   python3 scripts/cli.py scripts.io_modules.bill_downloader --input /tmp/bills.json
   python3 scripts/cli.py scripts.retrieval.cdn_loader --doc constraints
   python3 scripts/cli.py scripts.retrieval.transaction_detail_query --tx-id xxx
