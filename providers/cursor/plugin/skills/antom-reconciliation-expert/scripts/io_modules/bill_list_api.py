@@ -1,7 +1,7 @@
 """Bill List API
 
 Query bill download URLs via the antom CLI command:
-  antom report download-list --date <YYYYMMDD|YYYYMMDD-YYYYMMDD> --bill-type <TYPE> --json
+  antom report download-list --date <YYYYMMDD|YYYYMMDD-YYYYMMDD> --bill-type <TYPE> --json --live
 
 The CLI handles authentication, endpoint resolution, and HTTPS transport.
 Python is responsible only for constructing the command flags and

@@ -1,7 +1,7 @@
 """Transaction Detail Query
 
 Query a transaction detail via the antom CLI command:
-  antom report transaction-detail --transaction-id <id> --json
+  antom report transaction-detail --transaction-id <id> --json --live
 
 The CLI handles authentication, endpoint resolution, and HTTPS transport.
 Python is responsible only for constructing the command flags and
