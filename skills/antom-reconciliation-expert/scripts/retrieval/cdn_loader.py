@@ -189,7 +189,7 @@ if __name__ == "__main__":
     )
     _cli.add_argument("--doc", required=True,
                       help="Document to load: constraints, capabilities, guardrails, "
-                           "wiki-index, report-template, tools, workflow:<name>, wiki:<path>")
+                           "wiki-index, report-template, tools, version-manifest, workflow:<name>, wiki:<path>")
     _args = _cli.parse_args()
 
     _doc_map = {
