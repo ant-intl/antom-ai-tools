@@ -62,7 +62,7 @@ Do not write or modify integration code until all applicable items below are com
   - One-time Payments
   - Tokenized Payment
   - Subscription Payment
-- [ ] From the matched product overview, route by the selected integration mode and read the linked implementation docs needed for that flow, such as Quick Start, API list, frontend SDK, native SDK, Element, Checkout Page, or API-only guides.
+- [ ] From the matched product overview, route by the selected integration mode and read the linked implementation docs needed for that flow, such as Integration guide, Quick Start, API list, frontend SDK, native SDK, Element, Checkout Page, or API-only guides.
 - [ ] For coding tasks, route by the requested language or platform and read the matching product sample-code document from the same product overview before writing code. Inline examples in Quick Start, API reference, or integration guides are useful references, but they do not replace the product sample-code document.
 - [ ] From the matched product overview, read the asynchronous notification document or section that matches the selected product and integration mode.
 - [ ] Read [FAQ (Coding)](https://cdn.marmot-cloud.com/page/antom-integration-doc/troubleshoot/faq-coding.md), scanning items that match the selected product, integration mode, payment method, and market.
