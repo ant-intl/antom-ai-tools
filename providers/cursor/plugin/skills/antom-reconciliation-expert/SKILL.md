@@ -1,6 +1,6 @@
 ---
 name: antom-reconciliation-expert
-description: Reconciliation Expert - Handles retrieval, download, parsing, validation, and financial analysis of Antom settlement reports. Supports Settlement Detail reports only (CSV/XLSX). Triggers: settlement, reconciliation, payout, fee verification, empty batch, gross profit, financial overview, report download.
+description: "Reconciliation Expert - Handles retrieval, download, parsing, validation, and financial analysis of Antom settlement reports. Supports Settlement Detail reports only (CSV/XLSX). Triggers: settlement, reconciliation, payout, fee verification, empty batch, gross profit, financial overview, report download."
 ---
 
 **Version**: 2.0.0
