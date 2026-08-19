@@ -1,0 +1,59 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please provide the information below so we can help you efficiently.
+        请提供以下信息，以便我们更快地定位和回答问题。
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform / 使用平台
+      description: Select a platform if relevant. / 如果与问题相关，请选择使用的平台。
+      options:
+        - Claude Code
+        - Cursor
+        - Codex
+        - OpenClaw
+        - Other / 其他
+
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Skill
+      description: Select a Skill if relevant. / 如果与问题相关，请选择使用的 Skill。
+      options:
+        - antom-integration
+        - antom-reconciliation-expert
+        - Not sure / 不确定
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment / 环境信息
+      description: Operating system and platform version, if relevant. / 如有必要，请填写操作系统和平台版本。
+      placeholder: macOS 15, Cursor 2.6
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question / 问题描述
+      description: What did you try, what happened, and what did you expect? / 请说明你做了什么、实际发生了什么，以及预期结果。
+      placeholder: Please describe your question clearly. / 请清楚地描述你的问题。
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted logs / 已脱敏的错误信息
+      description: Optional. Remove all secrets and sensitive data. / 选填，请删除所有密钥和敏感数据。
+      render: shell
+
+  - type: checkboxes
+    id: sensitive_data
+    attributes:
+      label: Sensitive data confirmation / 敏感数据确认
+      options:
+        - label: I confirm that this post contains no secrets, payment information, transaction data, or personal information. / 我确认本帖不包含密钥、支付信息、交易数据或个人信息。
+          required: true
