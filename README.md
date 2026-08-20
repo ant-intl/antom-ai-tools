@@ -188,6 +188,17 @@ Run it before committing skill changes so all editors stay in lockstep.
 
 On GitHub, the [`sync-skills` workflow](.github/workflows/sync-skills.yml) watches `skills/**` and `scripts/sync-skills.mjs`. When `main` receives changes there, it runs `npm run sync-skills` and opens a `chore/sync-skills` PR with the mirrored provider copies — so you only need to edit the source-of-truth and merge the auto-generated PR.
 
+## Community & Support
+
+- Follow the [installation and Sandbox tutorials](https://github.com/ant-intl/antom-ai-tools/discussions/categories/tutorials-best-practices).
+- Ask integration questions in [Q&A](https://github.com/ant-intl/antom-ai-tools/discussions/categories/q-a).
+- Suggest new Skills or use cases in [Ideas](https://github.com/ant-intl/antom-ai-tools/discussions/categories/ideas).
+- Share what you built in [Show and tell](https://github.com/ant-intl/antom-ai-tools/discussions/categories/show-and-tell).
+- Browse all [Antom AI Tools Discussions](https://github.com/ant-intl/antom-ai-tools/discussions).
+
+If Antom AI Tools helps you, consider starring the repository to follow future updates.
+ 
+
 ## Contact
 
 Antom Technical Service — `TechnicalService@antom.com`
