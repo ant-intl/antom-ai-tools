@@ -1,6 +1,6 @@
 # Antom AI Tools
 
-A one-stop repository for building AI-powered products with Antom payment integration. This repository provides a collection of Skills — and editor plugins that wrap them — to enable seamless integration between Antom payment capabilities and LLMs or agent frameworks.
+A one-stop repository for building AI-powered products with Antom payment integration. This repository provides shared Agent Skills, provider-specific editor plugins, and an Agent Plugins 1.0-compatible portable package with an optional Antom MCP server connection.
 
 ## Available Skills
 
@@ -11,14 +11,38 @@ A one-stop repository for building AI-powered products with Antom payment integr
 
 ## Available Plugins
 
-Each Skill is packaged for every major AI code editor and agent platform, so you can install it natively without copying files by hand.
+Provider-specific packages remain available for supported editors and agent platforms. The repository root is also an Agent Plugins 1.0-compatible portable package, allowing compatible clients to discover the shared Skills and Antom MCP configuration.
 
 | Platform | Type | Name | Source |
 |----------|------|------|--------|
+| Agent Plugins 1.0-compatible clients | Portable Plugin | `antom-ai-tools` | [`plugin.json`](plugin.json) · [`mcp.json`](mcp.json) · [`skills/`](skills/) |
 | Cursor | Plugin | `antom-integration` | [`providers/cursor/plugin`](providers/cursor/plugin) |
 | Claude Code | Plugin | `antom-integration` | [`providers/claude/plugin`](providers/claude/plugin) |
 | Codex | Plugin | `antom-integration` | [`providers/codex/plugins/antom-integration`](providers/codex/plugins/antom-integration) |
 | OpenClaw | Skill | `antom-reconciliation-expert` | [`skills/antom-reconciliation-expert`](skills/antom-reconciliation-expert) |
+
+## Portable Agent Plugin
+
+The repository root follows the [Agent Plugins 1.0 specification](https://agent-plugins.org/):
+
+- [`plugin.json`](plugin.json) identifies the portable plugin.
+- [`skills/`](skills/) remains the source of truth for the bundled Agent Skills.
+- [`mcp.json`](mcp.json) declares the optional Antom MCP server connection.
+
+Installation, permissions, and authentication are managed by each compatible client. Follow the instructions provided by your client to load this repository root as an Agent Plugin.
+
+### Antom MCP Server
+
+The portable plugin declares the hosted Antom MCP server:
+
+- Endpoint: `https://mcp.antom.com`
+- Transport: Streamable HTTP
+- Configuration: [`mcp.json`](mcp.json)
+- Documentation: [Antom MCP documentation](https://docs.antom.com/ac/ref_zh-cn/mcp)
+
+The MCP server complements the existing Skills and does not replace them. If the MCP connection is unavailable, compatible clients can continue loading the bundled Skills.
+
+> **Access:** The Antom MCP server is currently available through a controlled allowlist rollout. See the [Antom MCP documentation](https://docs.antom.com/ac/ref_zh-cn/mcp) for access application instructions. After approval, authentication is handled through the client-managed OAuth flow; do not add credentials to `mcp.json`.
 
 ## antom-integration
 
@@ -153,6 +177,8 @@ Validate the settlement amounts in my report and show me any discrepancies.
 ## Repository Layout
 
 ```text
+plugin.json                              # Agent Plugins 1.0 manifest
+mcp.json                                 # hosted Antom MCP connection
 .cursor-plugin/marketplace.json
 .claude-plugin/marketplace.json
 .codex-plugin/marketplace.json
