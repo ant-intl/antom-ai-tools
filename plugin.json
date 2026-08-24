@@ -1,0 +1,20 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "antom-ai-tools",
+  "version": "0.1.0",
+  "description": "Portable Antom payment integration and reconciliation skills for AI agents.",
+  "author": {
+    "name": "Antom",
+    "email": "TechnicalService@antom.com",
+    "url": "https://www.antom.com/"
+  },
+  "homepage": "https://docs.antom.com",
+  "repository": "https://github.com/ant-intl/antom-ai-tools",
+  "license": "MIT",
+  "keywords": [
+    "antom",
+    "payments",
+    "payment-integration",
+    "reconciliation"
+  ]
+}
