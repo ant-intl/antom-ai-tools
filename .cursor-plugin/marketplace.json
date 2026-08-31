@@ -12,7 +12,8 @@
     {
       "name": "antom-integration",
       "source": "./providers/cursor/plugin",
-      "description": "Antom payment integration guidance for Cursor."
+      "description": "Antom payment integration guidance for Cursor.",
+      "category": "Payments"
     }
   ]
 }
