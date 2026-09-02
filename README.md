@@ -16,10 +16,42 @@ Provider-specific packages remain available for supported editors and agent plat
 | Platform | Type | Name | Source |
 |----------|------|------|--------|
 | Agent Plugins 1.0-compatible clients | Portable Plugin | `antom-ai-tools` | [`plugin.json`](plugin.json) · [`mcp.json`](mcp.json) · [`skills/`](skills/) |
+| Gemini CLI | Skills-only Extension | `antom-ai-tools` | [`gemini-extension.json`](gemini-extension.json) · [`skills/`](skills/) |
 | Cursor | Plugin | `antom-integration` | [`providers/cursor/plugin`](providers/cursor/plugin) |
 | Claude Code | Plugin | `antom-integration` | [`providers/claude/plugin`](providers/claude/plugin) |
 | Codex | Plugin | `antom-integration` | [`providers/codex/plugins/antom-integration`](providers/codex/plugins/antom-integration) |
 | OpenClaw | Skill | `antom-reconciliation-expert` | [`skills/antom-reconciliation-expert`](skills/antom-reconciliation-expert) |
+
+## Gemini CLI Extension
+
+The repository root is a Skills-only Gemini CLI extension that bundles both `antom-integration` and `antom-reconciliation-expert` from the shared [`skills/`](skills/) source of truth.
+
+Install it directly from GitHub:
+
+```bash
+gemini extensions install https://github.com/ant-intl/antom-ai-tools
+```
+
+For local development, validate and link the working copy:
+
+```bash
+gemini extensions validate .
+gemini extensions link .
+```
+
+Restart Gemini CLI after linking, then verify that both Skills are discoverable:
+
+```text
+/extensions list
+/skills list
+```
+
+### P0 Scope
+
+- `antom-integration` provides product selection, integration guidance, code generation, and troubleshooting guidance.
+- `antom-reconciliation-expert` provides reconciliation knowledge and local Settlement Detail report analysis.
+- The `gemini-extension.json` manifest declares neither an MCP server nor an Antom CLI dependency.
+- Online bill retrieval is outside the P0 validation scope and requires its upstream prerequisites to be satisfied separately.
 
 ## Portable Agent Plugin
 
@@ -177,6 +209,7 @@ Validate the settlement amounts in my report and show me any discrepancies.
 ## Repository Layout
 
 ```text
+gemini-extension.json                     # Gemini CLI Skills-only extension manifest
 plugin.json                              # Agent Plugins 1.0 manifest
 mcp.json                                 # hosted Antom MCP connection
 .cursor-plugin/marketplace.json
