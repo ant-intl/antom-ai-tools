@@ -2,7 +2,7 @@
 name: antom-integration
 description: >-
   Antom payment integration skill for product and integration-mode selection, integration Q&A, code implementation, troubleshooting, sandbox testing, and go-live guidance.
-  Use for One-time Payments, Tokenized Payment (recurring auto-debit), Subscription Payment, Payment Element, Checkout Page, and API-only integration.
+  Use for One-time Payments, Tokenized Payment (recurring auto-debit), Subscription Payment, Billing Product Family, Payment Element, Checkout Page, and API-only integration.
 ---
 
 # Scope
@@ -26,13 +26,15 @@ Use this section as the shared knowledge lookup for product advice, Q&A, code im
 
 ## SDK Selection
 
-Read [SDK Description](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/select-sdk.md) when choosing an SDK, when the implementation language is known, or before writing code.
+Read [SDK Description](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/select-sdk.md) when a server-side SDK is involved and you need to select a language, confirm the public version or installation, configure the API domain, or prepare backend code. Product-specific sample-code is selected from the matched product document.
 
 ## Product Selection
 
 Read [Product Decision](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/product-decision.md) for product or integration-mode advice. Use its clarification template only when needed.
 
-Prefer Checkout Page (CKP) when the user wants rapid integration and broad payment-method coverage, if it fits the scenario.
+Choose the product through Product Decision before opening any product overview or selecting an integration mode.
+
+After product selection, prefer Checkout Page (CKP) when the user wants rapid integration and broad payment-method coverage, if it fits the selected product and scenario.
 
 ## Integration Documentation Select
 
@@ -41,16 +43,17 @@ Based on the user's selected product and integration mode, locate the correspond
 - [One-time Payments](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/one-time-payments.md)
 - [Tokenized Payment](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/tokenized-payment.md)
 - [Subscription Payment](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/subscription-payment.md)
+- [Billing Product Family](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/billing.md)
 
 Read the most specific sections available in the matched product doc.
 
-- After selecting One-time Payments, Tokenized Payment, or Subscription Payment, do not load other product docs unless comparison or migration is requested.
+- After selecting a product, do not load other product docs unless comparison or migration is requested. For Billing, follow its Router and load only the selected scenario, capability, path, and operations.
 - For Q&A or product advice: infer what you can, read the closest relevant docs, and state assumptions when useful.
 - For troubleshooting: route by resultCode/resultMessage, API name, requestId, debug log, or error text first.
 
 # Writing Code
 
-Before writing or modifying code, first confirm the user's selected product, integration mode, and tech stack.
+Before writing or modifying code, first confirm the user's selected product and tech stack. Confirm an integration mode only when the selected flow has a payment-path or UI choice.
 
 Blocking list before coding:
 
@@ -62,9 +65,11 @@ Do not write or modify integration code until all applicable items below are com
   - One-time Payments
   - Tokenized Payment
   - Subscription Payment
-- [ ] From the matched product overview, route by the selected integration mode and read the linked implementation docs needed for that flow, such as Integration guide, Quick Start, API list, frontend SDK, native SDK, Element, Checkout Page, or API-only guides.
+  - Billing Product Family
+- [ ] From the matched product overview, route by integration mode when applicable and read only the implementation docs needed for that flow, such as Integration guide, Quick Start, API list, frontend SDK, native SDK, Element, Checkout Page, or API-only guides.
 - [ ] For coding tasks, route by the requested language or platform and read the matching product sample-code document from the same product overview before writing code. Inline examples in Quick Start, API reference, or integration guides are useful references, but they do not replace the product sample-code document.
-- [ ] From the matched product overview, read the asynchronous notification document or section that matches the selected product and integration mode.
+- [ ] If no exact sample-code exists for the requested operation, read its API contract and the selected SDK documentation or source. Do not infer SDK classes or methods from API field names; state any symbol that cannot be confirmed.
+- [ ] From the matched product overview, read the asynchronous notification document or section that matches the selected product and, when applicable, integration mode.
 - [ ] Read [FAQ (Coding)](https://cdn.marmot-cloud.com/page/antom-integration-doc/troubleshoot/faq-coding.md), scanning items that match the selected product, integration mode, payment method, and market.
 
 Generated code must:
@@ -99,6 +104,7 @@ After code is written, do not stop at "code is done". Guide the user through:
 - credentials and config: [Onboarding Guide](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/onboarding.md)
 - sandbox testing: [Sandbox Guide](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/sandbox-guide.md)
 - self-check and go-live readiness: [Self-Check List](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/self-check.md)
+- Billing code completion: [Billing Self-check](https://cdn.marmot-cloud.com/page/antom-integration-doc/integration-guides/billing-self-check.md)
 - error diagnosis: use `Troubleshooting`
 
 If the user asks about credentials, registration, sandbox testing, checklist, self-check, or go-live readiness at any point, read the matching companion doc and answer inline.
