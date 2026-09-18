@@ -7,15 +7,27 @@ on:
       - 'skills/**'
       - 'scripts/sync-skills.mjs'
   workflow_dispatch:
+    inputs:
+      operation:
+        description: Operation
+        type: choice
+        default: sync
+        options: [sync, prepare-release, download-stats]
+      version:
+        description: 'Release version (prepare-release only): vX.Y.Z'
+        type: string
+        required: false
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   sync:
+    permissions:
+      contents: write
+      pull-requests: write
     # Avoid self-trigger loops when the workflow's own PR is merged.
-    if: ${{ github.actor != 'github-actions[bot]' }}
+    if: ${{ github.actor != 'github-actions[bot]' && (github.event_name != 'workflow_dispatch' || inputs.operation == 'sync') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,3 +63,52 @@ jobs:
           branch: chore/sync-skills
           delete-branch: true
           labels: automation
+
+  prepare-release:
+    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'prepare-release'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: skills-release-${{ inputs.version }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - name: Require main
+        env:
+          SOURCE_REF: ${{ github.ref }}
+        run: test "$SOURCE_REF" = refs/heads/main
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.0'
+      - run: bun install --frozen-lockfile
+      - run: bun run test:skills
+      - name: Prepare draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SKILLS_VERSION: ${{ inputs.version }}
+        run: bun run skills:prepare "$SKILLS_VERSION"
+
+  download-stats:
+    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'download-stats'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.0'
+      - run: bun install --frozen-lockfile
+      - name: Read cumulative download counts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bun run skills:stats
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skill-download-report-${{ github.run_id }}
+          path: dist/skills-stats/
+          if-no-files-found: error
+          retention-days: 30
