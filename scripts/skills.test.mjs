@@ -60,6 +60,24 @@ test('draft retries reuse identical assets and never overwrite published version
   state.release.draft = false;
   await assert.rejects(prepareDraft(manifest, output, client), /already published/); assert.equal(state.uploads, 2);
 });
+test('updating draft notes preserves the requested version and verifies persisted metadata', async t => {
+  const { root, output } = await fixture(t); const manifest = await buildRelease(root, 'v1.0.0', output);
+  const { state, client } = fakeGitHub(); const api = client.api;
+  client.api = (endpoint, method, body) => {
+    const result = api(endpoint, method, body);
+    if (method === 'PATCH' && body.tag_name === undefined) state.release.tag_name = 'untagged-placeholder';
+    return result;
+  };
+  const release = await prepareDraft(manifest, output, client);
+  assert.equal(release.tag_name, manifest.tag);
+  assert.equal(release.target_commitish, manifest.sourceCommit);
+  client.api = (endpoint, method, body) => {
+    const result = api(endpoint, method, body);
+    if (method === 'PATCH') state.release.tag_name = 'unexpected-tag';
+    return result;
+  };
+  await assert.rejects(prepareDraft(manifest, output, client), /Draft version or source changed/);
+});
 test('partial draft resumes, but different bytes or source never get overwritten', async t => {
   const { root, output } = await fixture(t); const manifest = await buildRelease(root, 'v1.0.0', output);
   const { state, client } = fakeGitHub();

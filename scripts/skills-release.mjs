@@ -52,7 +52,10 @@ export async function prepareDraft(manifest, output, client = { api, pages, gh, 
   check(api(`releases/${release.id}`).draft, 'Release was published before validation finished');
   const table = ['| Skill | ZIP bytes | SHA-256 |', '| --- | ---: | --- |', ...manifest.skills.map(s => `| ${markdownCell(s.name)} | ${s.size} | ${s.sha256} |`)].join('\n');
   const body = `${marker}\nSource: ${manifest.sourceCommit}\n\n${table}\n\nValidated. Review the source and assets, then publish this release. Published assets must never be replaced.\n`;
-  api(`releases/${release.id}`, 'PATCH', { body });
+  // Preserve the intended tag and source when updating an unpublished release.
+  api(`releases/${release.id}`, 'PATCH', { body, tag_name: tag, target_commitish: manifest.sourceCommit });
+  release = api(`releases/${release.id}`);
+  check(release.draft && release.tag_name === tag && release.target_commitish === manifest.sourceCommit, 'Draft version or source changed; review the release before publishing');
   if (process.env.GITHUB_STEP_SUMMARY) await appendFile(process.env.GITHUB_STEP_SUMMARY, `## Skills draft ready\n\n[Review draft](${release.html_url})\n\n${body}`);
   console.log(`Draft ready: ${release.html_url}. Human publication required.`);
   return release;
