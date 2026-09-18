@@ -14,8 +14,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine provider check scope
+        id: scope
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EVENT_NAME" != pull_request ]; then
+            echo "required=true" >> "$GITHUB_OUTPUT"
+          elif git diff --quiet "$BASE_SHA...$HEAD_SHA" -- skills/ providers/ scripts/sync-skills.mjs; then
+            echo "required=false" >> "$GITHUB_OUTPUT"
+            echo "Provider check not applicable: this PR does not change skills, provider copies, or the sync script." >> "$GITHUB_STEP_SUMMARY"
+          else
+            result=$?
+            if [ "$result" -ne 1 ]; then
+              echo "::error::Unable to determine changed paths"
+              exit "$result"
+            fi
+            echo "required=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Verify provider skill directories match source
+        if: steps.scope.outputs.required == 'true'
         run: |
           out_of_sync=false
 
@@ -48,3 +72,15 @@ jobs:
           fi
 
           echo "✅ All provider skill directories are in sync."
+
+  release-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.0'
+      - run: bun install --frozen-lockfile
+      - run: bun run test:skills
+      - name: Verify release packaging (no publication)
+        run: bun run skills:build v0.0.0

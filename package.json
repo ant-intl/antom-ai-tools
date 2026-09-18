@@ -2,9 +2,17 @@
   "name": "antom-ai-tools",
   "private": true,
   "version": "0.1.0",
-  "description": "Antom AI Tools — skills and editor plugins for AI-assisted Antom payment integration.",
+  "description": "Antom AI Tools \u2014 skills and editor plugins for AI-assisted Antom payment integration.",
   "scripts": {
-    "sync-skills": "node scripts/sync-skills.mjs"
+    "sync-skills": "node scripts/sync-skills.mjs",
+    "skills:build": "node scripts/skills-release.mjs build",
+    "skills:prepare": "node scripts/skills-release.mjs prepare",
+    "skills:stats": "node scripts/skills-stats.mjs",
+    "test:skills": "node --test scripts/*.test.mjs"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "gray-matter": "4.0.3",
+    "jszip": "3.10.1"
+  }
 }
