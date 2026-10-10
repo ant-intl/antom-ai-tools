@@ -9,15 +9,21 @@ Without the CLI, use a platform-supplied project, check [scaffold differences](b
 
 ## Confirm the generation inputs
 
-Use this intake for a request to **create a new adapter**, not for knowledge questions or an existing project's implementation. Read the user's request and supplied specification first, retain the known values, and ask only about missing or conflicting ones. Use the user's language, short questions and understandable choices. Show only missing fields and their choices; keep SDK explanations, interface details, naming rules, examples and progress summaries out of the questionnaire. If a real conflict must be resolved, explain only that conflict in one sentence.
+Use this intake for a request to **create a new adapter**, not for knowledge questions or an existing project's implementation. Read the user's request and supplied specification first and retain the known values. A valid institution code explicitly supplied by the user is the first prerequisite; collect it before asking about any other missing or conflicting requirement. Use the user's language, short questions and understandable choices. Show only missing fields and their choices; keep SDK explanations, interface details, naming rules, examples and progress summaries out of the questionnaire. If a real conflict must be resolved, explain only that conflict in one sentence.
 
 Do not create an adapter directory, write its generation configuration, copy a demo, or run `init` (even `--dry-run`) while these choices are unresolved. Read-only inspection of the CLI, SDK and existing workspace is fine. Ask, wait for the reply, and then continue; an unanswered or preselected option is not a confirmed choice.
 
-### 1. Obtain the institution name/code and payment scenario
+### 1. Require a user-supplied institution code
 
-Ask for missing institution information in a separate free-text input box labeled **Institution name/code** in the user's language. When only a name or only a technical code is missing, use that field's short label. Use the client's question/input tool; do not replace the input box with a paragraph asking the user to reply in chat when the tool is available. In Codex, call `request_user_input_async` with a question `title` and omit `options`. Use an equivalent free-text form tool in other clients. Display no options, examples, placeholder, prefilled value or naming hints. Keep this as its own field; other short questions may be separate fields in the same tool call. Only clients without a suitable input tool may fall back to one short text question.
+If the user has not explicitly supplied a valid institution code for this task, open only one free-text input box labeled **Institution code** in the user's language. Use the client's question/input tool; do not replace the input box with a paragraph asking the user to reply in chat when the tool is available. In Codex, call `request_user_input_async` with exactly one question `title` and omit `options`. Use an equivalent free-text form tool in other clients. Display no options, examples, placeholder, prefilled value or naming hints. Only clients without a suitable input tool may fall back to one short text question.
 
-Collect payment type separately using the choices **card** and **non-card**. A display name is optional when the code is already supplied. Do not ask for an additional alias or acceptance of the code solely to derive project identifiers. If only a display name is supplied and it cannot produce a usable technical code, ask for that code. Preserve an existing platform-assigned channelCode or organization namespace when provided.
+Wait for the user's answer before asking about payment type, 3DS, transactions, notifications, security or output location. Do not combine these questions with the institution code field, send a second question call while its answer is pending, or treat silence as permission to use a demo code. Preserve any other choices already supplied without asking about them yet. Do not write a generation configuration, copy a demo, or run `init`, including `--dry-run`, before the code is supplied.
+
+A display name is optional and never substitutes for the code, even when its spelling could form valid identifiers. Do not infer the code from a name, username, directory, example, Maven coordinates, Java package or channelCode. A user-supplied code must be nonempty and usable under the identifier rules below; if it is unusable, ask only for a usable institution code and keep the other questions pending. When the user has already explicitly supplied a valid code, this prerequisite is met without a repeat question or an additional naming-approval round. Preserve an existing platform-assigned channelCode or organization namespace separately.
+
+### 2. Collect the payment scenario
+
+Only after the institution code prerequisite is met, ask about the remaining missing requirements. Collect payment type using the choices **card** and **non-card**.
 
 Once the payment type is known, ask about only the applicable scenarios:
 
@@ -35,7 +41,7 @@ When a requested method requires an unrequested method, ask one concise dependen
 
 The interactive wizard always includes `pay`; JSON mode can express refund-only or notification-only scopes. For Agent workflows, translate the confirmed scope to JSON and follow the actual validator rather than copying the wizard's default selections. Vaulting, dispute and unconnected entry-point capabilities are not available in this generator. Do not generate `receivePaymentNotify` or `onlineBankPaymentNotify` implementations (the SDK names are `notifyReceivePayment` and `notifyOnlineBankPayment`). Do not generate `acsUrlCallback` or `onlineBankUrlCallback`, a callback service or their operation constants, even if a local SDK snapshot still declares them. SDK declarations alone do not expand the generator's supported scope.
 
-### 2. Derive and use project identifiers
+### 3. Derive and use project identifiers
 
 Preserve explicit user-provided identifiers. Otherwise directly derive channelCode, Maven coordinates and the Java package from the supplied institution code and use them without a second confirmation. The user does not need to approve an identifier proposal. If a Maven groupId is supplied but the Java package is not, use that groupId plus `.adapter` as the package. Respect an existing organization namespace when supplied; an inferred namespace does not establish ownership or platform registration.
 
@@ -56,7 +62,7 @@ These are generation conventions, not SDK-mandated names. Report the chosen valu
 
 Different institution codes can normalize to the same namespace. Before generation, check available project manifests for actual channelCode, package or Maven-coordinate collisions; do not hide a conflict by changing identifiers silently. The CLI checks direct sibling adapter manifests when previewing/generating. This workspace check is not a platform-wide uniqueness guarantee; registration still requires platform review. Ask about a different code or explicit identifiers only when a real conflict exists.
 
-### 3. Ask only two security questions
+### 4. Ask only two security questions
 
 Ask exactly two global yes/no questions: **Does the adapter need signature handling?** and **Does the adapter need encryption handling?** Retain answers already supplied. Serialize them as `securityFeatures: {"signature": true/false, "encryption": true/false}`; do not ask per-method security questions during scaffold creation.
 
@@ -66,7 +72,7 @@ Do not request algorithms, operation order, `platform` versus `adapter`, key alg
 
 Advanced JSON configuration can separately specify the existing detailed `security` contract per method/direction instead of `securityFeatures`. Use it only when those rules are already supplied; do not turn it into the default intake or combine the two forms. The advanced form retains explicit operation order, implementation, algorithm/keyAlgorithm, static parameters and non-secret rule references.
 
-### 4. Summarize, preview and generate
+### 5. Summarize, preview and generate
 
 Summarize the supplied institution code, payment type/3DS mode, transaction and notification methods, derived or explicit identifiers, output path and the two security booleans for information only. Explicitly state whether refund and refund inquiry are included or excluded; when neither is selected, explain that no `ChannelRefundService` will be generated even if `notifyRefund` is selected. Compare the configuration and dry-run methods with the user's confirmed scope; a user-selected refund missing from `spi` is an input omission to correct before generation. Do not auto-enable refund transactions because a notification is selected. Do not ask whether the user accepts the names or wants you to proceed again. Ask only for unresolved scope/boolean answers, an unavailable output location or an actual conflict.
 
@@ -74,20 +80,20 @@ Once the required inputs and prerequisites are available, write the actual confi
 
 ### Example questions
 
-If only "Create an adapter for me" is known, use the question tool to open the institution input. For `request_user_input_async`, pass this shape after translating the title to the user's language:
+If only "Create an adapter for me" is known, use the question tool to open only the institution code input. A request containing an institution display name but no explicit code follows the same first step. For `request_user_input_async`, pass this shape after translating the title to the user's language:
 
 ```json
-{"questions": [{"title": "Institution name/code"}]}
+{"questions": [{"title": "Institution code"}]}
 ```
 
 Keep the form title short, and omit `options`. Do not preface it with an explanation of the scaffold, SDK, naming conventions or next steps.
 
-Ask for payment type with card/non-card choices in its own short question; it may share the tool call with the institution field. After a card answer, ask about no/one-call/two-call 3DS and the remaining transaction/notification choices. After a non-card answer, omit those card-only questions. Ask only the two signature/encryption yes/no security questions; derived identifiers do not need confirmation. Do not present a generated demo as the result of an unanswered questionnaire.
+Wait for the user's code answer. After a valid answer, ask for missing payment type with card/non-card choices in a subsequent tool call. After a card answer, ask about no/one-call/two-call 3DS and the remaining transaction/notification choices. After a non-card answer, omit those card-only questions. Ask only the two signature/encryption yes/no security questions; derived identifiers do not need confirmation. Retain answers already supplied and do not present a generated demo as the result of an unanswered questionnaire.
 
 ## When the user provides a CLI
 
 1. Confirm the tool's source, inspect --help, version and command help; the name aci alone does not establish identity.
-2. Verify template/SDK compatibility and follow the intake above: collect a missing institution code, card/non-card, applicable 3DS, SPI and notification scope, then wait for answers to those missing requirements. Derive project identifiers automatically.
+2. Verify template/SDK compatibility and follow the intake above: first obtain a valid user-supplied institution code and wait for that answer before asking about missing card/non-card, applicable 3DS, SPI and notification scope. Derive project identifiers automatically once the code is supplied.
 3. Ask the two global signature/encryption yes/no questions and use `securityFeatures`. Defer detailed protocol rules and the computation mode to implementation; enabled demonstration hooks must not be presented as completed security.
 4. Prefer supported noninteractive input and structured output. Inspect a preview file list when available; do not overwrite existing projects.
 5. When required inputs are resolved, generate with the derived/explicit identifiers in the designated directory without another naming approval, then implement real mappings/security rules. A compiling skeleton is not a finished integration.

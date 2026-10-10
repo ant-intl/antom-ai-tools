@@ -13,17 +13,19 @@ Antom Channel Integration (ACI) is Antom's channel integration tool for external
 | User intent | Workflow |
 | --- | --- |
 | Explain contracts or troubleshoot | Read the selected topic and answer with evidence. Do not create or edit a project. |
-| Create an adapter | Follow the authoritative [generation intake](references/project-generation.md#confirm-the-generation-inputs). Ask only for missing/conflicting choices and wait before configuration, dry run or generation. |
+| Create an adapter | Follow the authoritative [generation intake](references/project-generation.md#confirm-the-generation-inputs). Obtain a user-supplied institution code first; only then collect other missing choices. Wait for required answers before configuration, dry run or generation. |
 | Implement or change an adapter | Inspect the designated project and follow the [implementation workflow](references/implementation-workflow.md). Preserve unrelated work; do not run init over an existing project. |
 | Validate or prepare delivery | Follow [testing](references/TESTING.md) and [delivery](references/delivery.md). Report what actually ran and what remains unverified. |
 
-Generation intake collects payment/3DS scope, transaction and notification choices, a separate free-text institution name/code field, and only two security yes/no choices. Derive identifiers directly without a naming-approval round. The complete questions, dependency rules and naming conventions live in project generation; do not duplicate or replace them with example defaults. Keep generated source and documentation in English.
+Generation intake starts with a mandatory user-supplied institution code, followed by payment/3DS scope, transaction and notification choices, and only two security yes/no choices. Derive identifiers directly without a naming-approval round. The complete questions, dependency rules and naming conventions live in project generation; do not duplicate or replace them with example defaults. Keep generated source and documentation in English.
 
 ## Ask for missing information
 
+For new-project creation, a valid institution code explicitly supplied by the user is a prerequisite to every other intake question. If it is missing or unusable, ask only for **Institution code** and wait for the user's reply. Do not ask other questions in the same call or while this answer is pending. A display name, project identifiers, directory name, user identity or example configuration cannot substitute for a user-supplied code. Retain other answers already supplied, but ask about missing ones only after this prerequisite is met. Do not ask again when the user has already explicitly supplied a valid code for this task.
+
 Ask in the user's language with only a short field label or question and the necessary choices. Retain supplied answers; omit known fields. Keep SDK details, SPI dependencies, generated identifiers, implementation advice and progress summaries out of the questionnaire. For an actual conflict, add only the one sentence needed to resolve it.
 
-Use the available question/input tool instead of a chat-only question. Institution names and codes require their own free-text input box with no options, examples, placeholder or default. In Codex, use `request_user_input_async` with a `title` and omit `options`; use an equivalent free-text question tool in other clients. Fall back to one short chat question only when the client has no suitable input tool. See the [generation intake](references/project-generation.md#confirm-the-generation-inputs) for which fields are required.
+Use the available question/input tool instead of a chat-only question. The institution code requires a standalone free-text input box with no options, examples, placeholder or default. In Codex, use `request_user_input_async` with exactly one question `title` and omit `options`; use an equivalent free-text question tool in other clients. Fall back to one short chat question only when the client has no suitable input tool. See the [generation intake](references/project-generation.md#confirm-the-generation-inputs) for the remaining fields.
 
 ## Establish the sources of truth
 

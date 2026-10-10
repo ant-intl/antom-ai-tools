@@ -5,7 +5,7 @@
 Confirm SDK/template versions, channel code, card or non-card integration, 3DS interaction mode, transaction/notification scope, institution protocol, field mappings, result-code rules, synthetic examples and the platform configuration owner.
 Institution examples are not standard SDK protocols. Do not copy another channel's fields, success codes, headers or signatures.
 
-For new-project creation, follow the authoritative [generation intake](../project-generation.md#confirm-the-generation-inputs) before creating files. Detailed mappings, algorithms, order, computation mode and fixtures are implementation inputs, not prerequisites for merely creating a skeleton.
+For new-project creation, follow the authoritative [generation intake](../project-generation.md#confirm-the-generation-inputs): obtain a valid user-supplied institution code in a standalone question and wait for its answer before asking about other missing inputs or creating files. Detailed mappings, algorithms, order, computation mode and fixtures are implementation inputs, not prerequisites for merely creating a skeleton.
 
 The default workflow uses CLI 0.1.0; see [project generation](../project-generation.md). The CLI includes the AIS SDK 1.5.2 JAR and standalone consumer POM in sdk/. Prerequisites: Java 8 and Maven 3.6.3+.
 For a generic scaffold supplied directly by the platform, read [scaffold differences](../baseline-scaffold.md) first; do not assume identical class structures.

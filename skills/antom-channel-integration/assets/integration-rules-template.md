@@ -6,7 +6,8 @@ Supply this to a developer or Agent. Reference specific institution protocol sec
 
 | Item | Details |
 | --- | --- |
-| Company/institution code; optional display name | |
+| Institution code explicitly supplied by the user; required before other generation questions | |
+| Institution display name; optional, cannot replace the code | |
 | Adapter project path and allowed change scope | |
 | Maven groupId, artifactId, project version and Java package: explicit or derived from the code | |
 | Platform/SDK version | |
@@ -21,7 +22,9 @@ Supply this to a developer or Agent. Reference specific institution protocol sec
 | Protocol name, version and source sections | |
 | Platform configuration and integration owners | |
 
-For new-project creation, follow the authoritative [generation intake](../references/project-generation.md#confirm-the-generation-inputs). This is a recording form, not another questionnaire or CLI JSON schema. Detailed security rules, mappings and acceptance fixtures belong to implementation; no real keys belong here.
+For new-project creation, follow the authoritative [generation intake](../references/project-generation.md#confirm-the-generation-inputs): obtain the user's valid institution code first, waiting for it before asking any other generation questions; then collect only the remaining missing inputs.
+
+This is a recording form, not another questionnaire or CLI JSON schema. Detailed security rules, mappings and acceptance fixtures belong to implementation; no real keys belong here.
 
 ## Per-method field mappings
 
