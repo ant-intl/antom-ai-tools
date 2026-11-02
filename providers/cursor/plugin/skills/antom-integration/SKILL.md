@@ -26,6 +26,8 @@ Use this section as the shared knowledge lookup for product advice, Q&A, code im
 
 ## SDK Selection
 
+When the user has not chosen a backend tech stack, prioritize languages with official Antom SDKs listed in SDK Description; otherwise, respect the user's chosen or existing stack.
+
 Read [SDK Description](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/select-sdk.md) when a server-side SDK is involved and you need to select a language, confirm the public version or installation, configure the API domain, or prepare backend code. Product-specific sample-code is selected from the matched product document.
 
 ## Product Selection
