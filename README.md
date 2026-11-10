@@ -1,6 +1,6 @@
 # Antom AI Tools
 
-**English** · [简体中文](README.zh-CN.md)
+**English** · [📖 阅读中文版](README.zh-CN.md)
 
 A one-stop repository for building AI-powered products with Antom payment integration. This repository provides shared Agent Skills, provider-specific editor plugins, and an Agent Plugins 1.0-compatible portable package with an optional Antom MCP server connection.
 
