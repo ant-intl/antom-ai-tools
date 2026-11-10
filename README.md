@@ -1,5 +1,7 @@
 # Antom AI Tools
 
+**English** · [📖 阅读中文版](README.zh-CN.md)
+
 A one-stop repository for building AI-powered products with Antom payment integration. This repository provides shared Agent Skills, provider-specific editor plugins, and an Agent Plugins 1.0-compatible portable package with an optional Antom MCP server connection.
 
 ## Available Skills
@@ -7,123 +9,19 @@ A one-stop repository for building AI-powered products with Antom payment integr
 | Skill | Description |
 |-------|-------------|
 | **antom-integration** | Integrate Antom payment products including One-time Payments, Tokenized Payment, and Subscription Payment. |
-| **antom-reconciliation-expert** | Reconciliation Report Analysis Expert — Parses local Settlement Detail report files (CSV/XLSX) for settlement amount validation, fee analysis, and reconciliation knowledge Q&A. |
+| **antom-reconciliation-expert** | Validate settlement amounts and analyze fees in Settlement Detail reports (CSV/XLSX). Retrieve reports online with an authenticated Antom CLI. |
 | **antom-channel-integration** | Use ACI to build institution-side AIS channel adapters: understand SPI contracts, implement field mappings and security rules, generate tailored projects, and verify testing and delivery requirements. |
 
-## Available Plugins
+<a name="antom-integration"></a>
 
-Provider-specific packages remain available for supported editors and agent platforms. The repository root is also an Agent Plugins 1.0-compatible portable package, allowing compatible clients to discover the shared Skills and Antom MCP configuration.
-
-| Platform | Type | Name | Source |
-|----------|------|------|--------|
-| Agent Plugins 1.0-compatible clients | Portable Plugin | `antom-ai-tools` | [`plugin.json`](plugin.json) · [`mcp.json`](mcp.json) · [`skills/`](skills/) |
-| Gemini CLI | Skills-only Extension | `antom-ai-tools` | [`gemini-extension.json`](gemini-extension.json) · [`skills/`](skills/) |
-| Cursor | Plugin | `antom-integration` | [`providers/cursor/plugin`](providers/cursor/plugin) |
-| Claude Code | Plugin | `antom-integration` | [`providers/claude/plugin`](providers/claude/plugin) |
-| Codex | Plugin | `antom-integration` | [`providers/codex/plugins/antom-integration`](providers/codex/plugins/antom-integration) |
-| OpenClaw | Skill | `antom-reconciliation-expert` | [`skills/antom-reconciliation-expert`](skills/antom-reconciliation-expert) |
-
-## Gemini CLI Extension
-
-The repository root is a Skills-only Gemini CLI extension that bundles both `antom-integration` and `antom-reconciliation-expert` from the shared [`skills/`](skills/) source of truth.
-
-Install it directly from GitHub:
-
-```bash
-gemini extensions install https://github.com/ant-intl/antom-ai-tools
-```
-
-For local development, validate and link the working copy:
-
-```bash
-gemini extensions validate .
-gemini extensions link .
-```
-
-Restart Gemini CLI after linking, then verify that both Skills are discoverable:
-
-```text
-/extensions list
-/skills list
-```
-
-### P0 Scope
-
-- `antom-integration` provides product selection, integration guidance, code generation, and troubleshooting guidance.
-- `antom-reconciliation-expert` provides reconciliation knowledge and local Settlement Detail report analysis.
-- The `gemini-extension.json` manifest declares neither an MCP server nor an Antom CLI dependency.
-- Online bill retrieval is outside the P0 validation scope and requires its upstream prerequisites to be satisfied separately.
-
-## Portable Agent Plugin
-
-The repository root follows the [Agent Plugins 1.0 specification](https://agent-plugins.org/):
-
-- [`plugin.json`](plugin.json) identifies the portable plugin.
-- [`skills/`](skills/) remains the source of truth for the bundled Agent Skills.
-- [`mcp.json`](mcp.json) declares the optional Antom MCP server connection.
-
-Installation, permissions, and authentication are managed by each compatible client. Follow the instructions provided by your client to load this repository root as an Agent Plugin.
-
-### Antom MCP Server
-
-The portable plugin declares the hosted Antom MCP server:
-
-- Endpoint: `https://mcp.antom.com`
-- Transport: Streamable HTTP
-- Configuration: [`mcp.json`](mcp.json)
-- Documentation: [Antom MCP documentation](https://docs.antom.com/ac/ref_zh-cn/mcp)
-
-The MCP server complements the existing Skills and does not replace them. If the MCP connection is unavailable, compatible clients can continue loading the bundled Skills.
-
-> **Access:** The Antom MCP server is currently available through a controlled allowlist rollout. See the [Antom MCP documentation](https://docs.antom.com/ac/ref_zh-cn/mcp) for access application instructions. After approval, authentication is handled through the client-managed OAuth flow; do not add credentials to `mcp.json`.
-
-## antom-integration
+<details>
+<summary><strong>antom-integration</strong> · Payment integration</summary>
 
 ### What Problem Does It Solve
 
 Antom encapsulates core payment capabilities into standardized Skill components that are fully readable by AI. Developers can quickly integrate payments in Vibe Coding mode without dealing with complex underlying logic — simply describe your needs in natural language.
 
 This Skill helps AI quickly load the Antom knowledge base, answer Antom integration questions, and generate integration code, significantly reducing the learning curve and development effort for payment integration.
-
-### Install
-
-#### Cursor
-
-Submit / install via the Cursor marketplace, or for local development:
-
-```bash
-cp -R providers/cursor/plugin ~/.cursor/plugins/local/antom-integration
-# then restart Cursor (>= 2.6)
-```
-
-Marketplace entry: [`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json)
-
-#### Claude Code
-
-```text
-/plugin marketplace add ant-intl/antom-ai-tools
-/plugin install antom-integration@antom
-```
-
-For local development, point the marketplace at the working copy:
-
-```text
-/plugin marketplace add /absolute/path/to/antom-ai-tools
-```
-
-Validate locally:
-
-```bash
-claude plugin validate .
-```
-
-Marketplace entry: [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json)
-
-#### Codex
-
-Marketplace entry: [`.codex-plugin/marketplace.json`](.codex-plugin/marketplace.json) (legacy importer reads `.agents/plugins/marketplace.json`).
-
-Plugin manifest: [`providers/codex/plugins/antom-integration/.codex-plugin/plugin.json`](providers/codex/plugins/antom-integration/.codex-plugin/plugin.json)
 
 ### Test Assets
 
@@ -162,7 +60,12 @@ Review my Antom payment flow for security issues.
 2. Always review the integration code generated by AI and verify the logic yourself before deployment.
 3. The Skill is updated in sync with Antom product iterations. It is recommended to periodically re-run the installation command to get the latest version.
 
-## antom-reconciliation-expert
+</details>
+
+<a name="antom-reconciliation-expert"></a>
+
+<details>
+<summary><strong>antom-reconciliation-expert</strong> · Settlement reconciliation</summary>
 
 ### What Problem Does It Solve
 
@@ -170,21 +73,11 @@ Antom delivers Settlement Detail reports to merchants, but verifying settlement 
 
 This Skill turns AI into a reconciliation expert. Simply provide your local Settlement Detail report file or ask a question in natural language, and AI will parse the data, validate every settlement formula, break down all fee components, and explain reconciliation rules — significantly reducing the time and effort needed for settlement verification.
 
+With Antom CLI installed and authenticated, the Skill can also retrieve and download Settlement Detail reports online.
+
 ### Install
 
-#### OpenClaw
-
-Manually copy the skill into your OpenClaw skills directory:
-
-```bash
-cp -R skills/antom-reconciliation-expert ~/.openclaw/skills/antom-reconciliation-expert
-```
-
-Verify installation:
-
-```bash
-openclaw skills list
-```
+Follow the [official installation guide](https://docs.antom.com/ac/reconcile/skill) to install the Skill in your AI tool and configure Antom CLI for online report retrieval.
 
 ### Example Prompts
 
@@ -207,7 +100,12 @@ Validate the settlement amounts in my report and show me any discrepancies.
 3. Fee amounts (such as interchangeFee, schemeFee) are displayed as-is from the report. The Skill does not perform reverse rate calculation on these fees.
 4. The Skill is updated in sync with Antom product iterations. It is recommended to periodically re-run the installation command to get the latest version.
 
-## antom-channel-integration (ACI)
+</details>
+
+<a name="antom-channel-integration-aci"></a>
+
+<details>
+<summary><strong>antom-channel-integration (ACI)</strong> · Channel integration (ACI)</summary>
 
 ### What Problem Does It Solve
 
@@ -258,48 +156,97 @@ Use $antom-channel-integration in my adapter directory. Implement pay, inquiryPa
 2. Do not include real keys, production credentials or card data in public issues or commits. Distribute the bundled SDK JAR and standalone consumer POM with the Skill and CLI; exclude local build output from Skill source packages.
 3. Passing local tests does not replace platform assembly validation, institution integration testing, or release approval.
 
-## Repository Layout
+</details>
+
+## Portable Agent Plugin
+
+The repository root follows the [Agent Plugins 1.0 specification](https://agent-plugins.org/):
+
+- [`plugin.json`](plugin.json) identifies the portable plugin.
+- [`skills/`](skills/) remains the source of truth for the bundled Agent Skills.
+- [`mcp.json`](mcp.json) declares the optional Antom MCP server connection.
+
+Installation, permissions, and authentication are managed by each compatible client. Follow the instructions provided by your client to load this repository root as an Agent Plugin.
+
+### Antom MCP Server
+
+The portable plugin declares the hosted Antom MCP server:
+
+- Endpoint: `https://mcp.antom.com`
+- Transport: Streamable HTTP
+- Configuration: [`mcp.json`](mcp.json)
+- Documentation: [Antom MCP documentation](https://docs.antom.com/ac/ref_zh-cn/mcp)
+
+The MCP server complements the existing Skills and does not replace them. If the MCP connection is unavailable, compatible clients can continue loading the bundled Skills.
+
+> **Access:** The Antom MCP server is currently available through a controlled allowlist rollout. See the [Antom MCP documentation](https://docs.antom.com/ac/ref_zh-cn/mcp) for access application instructions. After approval, authentication is handled through the client-managed OAuth flow; do not add credentials to `mcp.json`.
+
+## Platform Support and Installation
+
+Antom AI tools help you generate payment integration code, test payments in the sandbox, and analyze settlement reports. AI agents can also call Antom APIs through Antom MCP after authorization.
+
+See the [official Antom AI Tools documentation](https://docs.antom.com/ac/ref/ai-tools?portal_channel=Antom_Website_WeChat_Owned&utm_campaign=product_innovation&utm_content=daiding&utm_medium=article&utm_source=wechat) to find which Antom capabilities each platform supports and how to install the tools.
+
+| Platform | What you can use | Get started |
+|----------|------------------|-------------|
+| Cursor | The official **Antom** plugin provides payment integration, settlement reconciliation, and access to Antom APIs via Antom MCP with OAuth. | [Cursor Marketplace](https://cursor.com/marketplace/antom) or `/add-plugin antom-integration` · [Community directory](https://cursor.directory/plugins/antom-2) |
+| ChatGPT (Codex) | Antom Integration and Antom Reconciliation Expert are available as separate plugins. | [Antom Integration](https://chatgpt.com/plugins/plugins_6a96e1a333088191a3d94d8e5d379c10) · [Antom Reconciliation Expert](https://chatgpt.com/plugins/plugins_6a979109d2ac8191b059c526f9303693) |
+| Claude Code | The `antom-integration` plugin provides payment integration guidance and sandbox test commands. | [Install from GitHub](#install-from-github) |
+| Gemini CLI | The `antom-ai-tools` extension includes Skills for Antom payment integration and settlement reconciliation. | [Gemini CLI Extensions](https://geminicli.com/extensions/) (search `antom-ai-tools`) · [Install from GitHub](#install-from-github) |
+| Qoder | Separate Skills for Antom CLI, payment integration, and settlement reconciliation. | [Antom CLI](https://qoder.com/marketplace/skill?id=abafa126-8fde-4bde-a2bd-419bd297fe31) · [Payment Integration](https://qoder.com/marketplace/skill?id=b6f6c385-abb1-4be9-b8aa-d0d7a3c78488) · [Reconciliation Expert](https://qoder.com/marketplace/skill?id=cfa3c2f8-5b38-4665-831d-0a3ca8fdac8e) |
+| Agent Plugins 1.0 clients | The portable `antom-ai-tools` plugin includes the shared Skills and an optional Antom MCP connection. | [Portable plugin setup](#portable-agent-plugin) |
+
+### Install from GitHub
+
+In **Claude Code**, add the repository marketplace and install the plugin.
 
 ```text
-gemini-extension.json                     # Gemini CLI Skills-only extension manifest
-plugin.json                              # Agent Plugins 1.0 manifest
-mcp.json                                 # hosted Antom MCP connection
-.cursor-plugin/marketplace.json
-.claude-plugin/marketplace.json
-.codex-plugin/marketplace.json
-.agents/plugins/marketplace.json
-skills/antom-integration/SKILL.md          # shared source of truth
-skills/antom-reconciliation-expert/        # reconciliation expert skill + scripts
-skills/antom-channel-integration/           # ACI adapter integration skill + references
-  scripts/aci-cli/                        # Java CLI, templates, and regression tests
-providers/
-  cursor/plugin/        # Cursor adapter
-  claude/plugin/        # Claude Code adapter
-  codex/plugins/        # Codex adapter
-LICENSE
+/plugin marketplace add ant-intl/antom-ai-tools
+/plugin install antom-integration@antom
 ```
 
-Each provider package is self-contained and ships its own copy of the skill so editors can load it independently. The single source of truth is `skills/`; provider copies are mirrored from it via the sync script below.
-
-## Sync Skills Across Providers
-
-To prepare provider packages from the shared Skill sources, run:
+For **Gemini CLI**, copy the install command from the `antom-ai-tools` listing in the extension gallery or run it directly below.
 
 ```bash
-npm run sync-skills
-# or
-node scripts/sync-skills.mjs
+gemini extensions install https://github.com/ant-intl/antom-ai-tools
 ```
 
-The script copies every file under `skills/<name>/` into:
+<details>
+<summary>Local development and verification</summary>
 
-- `providers/cursor/plugin/skills/<name>/`
-- `providers/claude/plugin/skills/<name>/`
-- `providers/codex/plugins/<name>/skills/<name>/`
+For **Cursor**, copy the plugin from the working copy and restart Cursor (2.6 or later). The repository marketplace configuration is [`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json).
 
-Use this command when preparing provider packages. Maintain channel integration changes only in `skills/antom-channel-integration/` and this README.
+```bash
+cp -R providers/cursor/plugin ~/.cursor/plugins/local/antom-integration
+```
 
-On GitHub, the [`sync-skills` workflow](.github/workflows/sync-skills.yml) watches `skills/**` and `scripts/sync-skills.mjs`. When `main` receives changes there, it runs `npm run sync-skills` and opens a `chore/sync-skills` PR with the mirrored provider copies — so you only need to edit the source-of-truth and merge the auto-generated PR.
+For **Claude Code**, point the marketplace at the working copy and validate the plugin. The marketplace configuration is [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json).
+
+```text
+/plugin marketplace add /absolute/path/to/antom-ai-tools
+```
+
+```bash
+claude plugin validate .
+```
+
+For **Codex**, see the repository [marketplace configuration](.codex-plugin/marketplace.json) and the [plugin manifest](providers/codex/plugins/antom-integration/.codex-plugin/plugin.json). The legacy importer reads [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json).
+
+For **Gemini CLI**, validate and link the working copy.
+
+```bash
+gemini extensions validate .
+gemini extensions link .
+```
+
+Restart Gemini CLI after linking, then check that it can find the extension and its Skills.
+
+```text
+/extensions list
+/skills list
+```
+
+</details>
 
 ## Community & Support
 
@@ -309,12 +256,9 @@ On GitHub, the [`sync-skills` workflow](.github/workflows/sync-skills.yml) watch
 - Share what you built in [Show and tell](https://github.com/ant-intl/antom-ai-tools/discussions/categories/show-and-tell).
 - Browse all [Antom AI Tools Discussions](https://github.com/ant-intl/antom-ai-tools/discussions).
 
+For technical support, contact Antom Technical Service at `TechnicalService@antom.com`.
+
 If Antom AI Tools helps you, consider starring the repository to follow future updates.
- 
-
-## Contact
-
-Antom Technical Service — `TechnicalService@antom.com`
 
 ## License
 
