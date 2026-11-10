@@ -1,6 +1,6 @@
 # Antom AI Tools
 
-[English](README.md) · **简体中文**
+[📖 Read English version](README.md) · **简体中文**
 
 Antom AI Tools 帮助开发者在 AI 产品中接入 Antom 支付。仓库提供可复用的 Agent 技能、适用于不同平台的编辑器插件，以及兼容 Agent Plugins 1.0 规范的可移植插件。后者可按需连接 Antom MCP 服务。
 
