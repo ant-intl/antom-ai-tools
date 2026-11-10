@@ -1,0 +1,14 @@
+skills/antom-integration/SKILL.md
+  h_ece1d2d7cab43f 5,43,47,68,81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "4e1af3249a7e9cd7701818162584e02c0b8ccadb",
+  "prompts": {},
+  "humans": {
+    "h_ece1d2d7cab43f": {
+      "author": "yanhong <yanhong.yan@alibaba-inc.com>"
+    }
+  }
+}
