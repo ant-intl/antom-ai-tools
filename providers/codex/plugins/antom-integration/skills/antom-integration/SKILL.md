@@ -2,7 +2,7 @@
 name: antom-integration
 description: >-
   Antom payment integration skill for product and integration-mode selection, integration Q&A, code implementation, troubleshooting, sandbox testing, and go-live guidance.
-  Use for One-time Payments, Tokenized Payment (recurring auto-debit), Subscription Payment, Billing Product Family, Payment Element, Checkout Page, and API-only integration.
+  Use for One-time Payments, Tokenized Payment (recurring auto-debit), Billing, Payment Element, Checkout Page, and API-only integration.
 ---
 
 # Scope
@@ -40,12 +40,11 @@ After product selection, prefer Checkout Page (CKP) when the user wants rapid in
 
 ## Integration Documentation Select
 
-Based on the user's selected product and integration mode, locate the corresponding product integration documentation:
+Based on the user's selected product or capability and any applicable integration mode, locate the corresponding integration documentation:
 
 - [One-time Payments](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/one-time-payments.md)
 - [Tokenized Payment](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/tokenized-payment.md)
-- [Subscription Payment](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/subscription-payment.md)
-- [Billing Product Family](https://cdn.marmot-cloud.com/page/antom-integration-doc/references/billing.md)
+- [Billing subscription integration](https://cdn.marmot-cloud.com/page/antom-integration-doc/billing/subscription-integration-core.md)
 
 Read the most specific sections available in the matched product doc.
 
@@ -66,8 +65,7 @@ Do not write or modify integration code until all applicable items below are com
 - [ ] Read the matched product overview from `Integration Documentation Select`:
   - One-time Payments
   - Tokenized Payment
-  - Subscription Payment
-  - Billing Product Family
+  - Billing
 - [ ] From the matched product overview, route by integration mode when applicable and read only the implementation docs needed for that flow, such as Integration guide, Quick Start, API list, frontend SDK, native SDK, Element, Checkout Page, or API-only guides.
 - [ ] For coding tasks, route by the requested language or platform and read the matching product sample-code document from the same product overview before writing code. Inline examples in Quick Start, API reference, or integration guides are useful references, but they do not replace the product sample-code document.
 - [ ] If no exact sample-code exists for the requested operation, read its API contract and the selected SDK documentation or source. Do not infer SDK classes or methods from API field names; state any symbol that cannot be confirmed.
@@ -80,7 +78,7 @@ Generated code must:
 - not treat client-side redirect results as final payment status
 - confirm uncertain payment status through asynchronous notification or query API
 - include development debug logging guidance when useful, masking card numbers, CVV, private keys, and secrets
-- include a brief FAQ compliance note confirming how each applicable item is handled, such as `gateway=correct region`, `settlementCurrency=omitted`, or `subscriptionExpiryTime=default`
+- include a brief FAQ compliance note confirming how each applicable item is handled, such as `gateway=correct region` or `settlementCurrency=matches API and merchant configuration`
 - include a brief note about the docs and validation assumptions used
 - include next-step guidance for credentials, sandbox testing, self-check, and go-live readiness when the user is building a full integration
 
