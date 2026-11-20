@@ -256,7 +256,7 @@ gemini extensions link .
 - 在[成果展示区（Show and tell）](https://github.com/ant-intl/antom-ai-tools/discussions/categories/show-and-tell)分享你的项目。
 - 浏览全部 [Antom AI Tools 讨论](https://github.com/ant-intl/antom-ai-tools/discussions)。
 
-使用微信或企业微信扫描下方二维码，加入「Antom 开发者」交流群。二维码在 11 月 17 日前有效。
+使用微信或企业微信扫描下方二维码，加入「Antom 开发者」交流群。二维码在 11 月 27 日前有效。
 
 <img src="assets/wechat-group-qr-1127.png" alt="Antom 开发者交流群二维码" width="360" />
 
