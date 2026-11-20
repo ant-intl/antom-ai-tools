@@ -258,7 +258,7 @@ gemini extensions link .
 
 使用微信或企业微信扫描下方二维码，加入「Antom 开发者」交流群。二维码在 11 月 17 日前有效。
 
-<img src="assets/wechat-group-qr-1123.png" alt="Antom 开发者交流群二维码" width="360" />
+<img src="assets/wechat-group-qr-1127.png" alt="Antom 开发者交流群二维码" width="360" />
 
 
 如需技术支持，请通过 `TechnicalService@antom.com` 联系 Antom 技术服务团队。
